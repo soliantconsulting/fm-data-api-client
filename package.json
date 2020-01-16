@@ -1,6 +1,6 @@
 {
   "name": "fm-data-api-client",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "FileMaker Data API Client",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -22,7 +22,13 @@
   "files": [
     "lib/**/*"
   ],
-  "keywords": ["FileMaker", "REST", "API", "Data", "Typescript"],
+  "keywords": [
+    "FileMaker",
+    "REST",
+    "API",
+    "Data",
+    "Typescript"
+  ],
   "author": "Soliant Consulting",
   "license": "MIT",
   "devDependencies": {
