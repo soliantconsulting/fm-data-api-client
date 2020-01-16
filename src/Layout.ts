@@ -17,12 +17,6 @@ export type Record = {
             [key : string] : FieldValue;
         }>;
     };
-    portalDataInfo : Array<{
-        database : string;
-        table : string;
-        foundCount : number;
-        returnedCount : number;
-    }>;
 };
 
 export type ScriptParams = {
@@ -91,7 +85,8 @@ export type GetResponse = ScriptResponse & {
 };
 
 export type Query = {
-    [key : string] : FieldValue | undefined;
+    [key : string] : FieldValue;
+} & {
     omit? : boolean;
 };
 
