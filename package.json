@@ -36,14 +36,14 @@
     "@types/into-stream": "^3.1.1",
     "@types/jest": "^24.9.0",
     "@types/luxon": "^1.21.0",
-    "@types/node": "^13.1.6",
-    "@types/node-fetch": "^2.5.4",
+    "@types/node": "^13.1.7",
     "jest": "^24.9.0",
     "ts-jest": "^24.3.0",
     "tslint": "^5.20.1",
     "typescript": "^3.7.4"
   },
   "dependencies": {
+    "@types/node-fetch": "^2.5.4",
     "form-data": "^3.0.0",
     "into-stream": "^5.1.1",
     "luxon": "^1.21.3",
