@@ -1,0 +1,46 @@
+{
+  "name": "fm-data-api-client",
+  "version": "0.1.0",
+  "description": "FileMaker Data API Client",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "format": "tslint -p tsconfig.json --fix",
+    "lint": "tslint -p tsconfig.json",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test && npm run lint",
+    "preversion": "npm run lint",
+    "version": "npm run format && git add -A src",
+    "postversion": "git push && git push --tags",
+    "test": "jest --config jestconfig.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com:soliantconsulting/fm-data-api-client.git"
+  },
+  "files": [
+    "lib/**/*"
+  ],
+  "keywords": ["FileMaker", "REST", "API", "Data", "Typescript"],
+  "author": "Soliant Consulting",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/form-data": "^2.5.0",
+    "@types/into-stream": "^3.1.1",
+    "@types/jest": "^24.9.0",
+    "@types/luxon": "^1.21.0",
+    "@types/node": "^13.1.6",
+    "@types/node-fetch": "^2.5.4",
+    "jest": "^24.9.0",
+    "ts-jest": "^24.3.0",
+    "tslint": "^5.20.1",
+    "typescript": "^3.7.4"
+  },
+  "dependencies": {
+    "form-data": "^3.0.0",
+    "into-stream": "^5.1.1",
+    "luxon": "^1.21.3",
+    "node-fetch": "^2.6.0"
+  }
+}
