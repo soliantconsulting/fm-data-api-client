@@ -1,4 +1,4 @@
-import {DateTime} from 'luxon';
+import {DateTimeFormatter, LocalDate, LocalDateTime, LocalTime} from '@js-joda/core';
 
 /**
  * Quotes a string for use in queries.
@@ -54,42 +54,44 @@ export const parseBoolean = (value : string | number) : boolean => {
  */
 export class DateUtil
 {
-    public constructor(
-        private timeZone : string,
-        private dateFormat = 'MM/dd/yyyy',
-        private timeFormat = 'HH:mm:ss',
-        private timeStampFormat = 'MM/dd/yyyy HH:mm:ss'
-    )
+    private readonly dateFormatter : DateTimeFormatter;
+    private readonly timeFormatter : DateTimeFormatter;
+    private readonly timeStampFormatter : DateTimeFormatter;
+
+    public constructor(dateFormat = 'MM/dd/yyyy', timeFormat = 'HH:mm:ss', timeStampFormat = 'MM/dd/yyyy HH:mm:ss')
     {
+        this.dateFormatter = DateTimeFormatter.ofPattern(dateFormat);
+        this.timeFormatter = DateTimeFormatter.ofPattern(timeFormat);
+        this.timeStampFormatter = DateTimeFormatter.ofPattern(timeStampFormat);
     }
 
-    public parseDate(value : string) : DateTime
+    public parseDate(value : string) : LocalDate
     {
-        return DateTime.fromFormat(value, this.dateFormat);
+        return LocalDate.parse(value, this.dateFormatter);
     }
 
-    public parseTime(value : string) : DateTime
+    public parseTime(value : string) : LocalTime
     {
-        return DateTime.fromFormat(value, this.timeFormat);
+        return LocalTime.parse(value, this.timeFormatter);
     }
 
-    public parseTimeStamp(value : string) : DateTime
+    public parseTimeStamp(value : string) : LocalDateTime
     {
-        return DateTime.fromFormat(value, this.timeFormat, {zone: this.timeZone});
+        return LocalDateTime.parse(value, this.timeStampFormatter);
     }
 
-    public formatDate(value : DateTime) : string
+    public formatDate(value : LocalDate) : string
     {
-        return value.toFormat(this.dateFormat);
+        return value.format(this.dateFormatter);
     }
 
-    public formatTime(value : DateTime) : string
+    public formatTime(value : LocalTime) : string
     {
-        return value.toFormat(this.timeFormat);
+        return value.format(this.timeFormatter);
     }
 
-    public formatTimeStamp(value : DateTime) : string
+    public formatTimeStamp(value : LocalDateTime) : string
     {
-        return value.toFormat(this.timeStampFormat, {timeZone: this.timeZone});
+        return value.format(this.timeStampFormatter);
     }
 }
