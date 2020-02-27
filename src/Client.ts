@@ -51,6 +51,23 @@ export default class Client
         return (await response.json()).response;
     }
 
+    public async clearToken() : Promise<void>
+    {
+        if (!this.token) {
+            return;
+        }
+
+        await fetch(`${this.uri}/fmi/data/v1/databases/${this.database}/sessions/${this.token}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        this.token = null;
+        this.lastCall = 0;
+    }
+
     private async getToken() : Promise<string>
     {
         if (this.token !== null && Date.now() - this.lastCall < 14 * 60 * 1000) {
