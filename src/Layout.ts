@@ -12,7 +12,7 @@ export type GenericPortalData = {
     };
 };
 
-export type Record<T extends FieldData, U extends GenericPortalData> = {
+export type Record<T extends FieldData = FieldData, U extends GenericPortalData = GenericPortalData> = {
     fieldData : T;
     recordId : string;
     modId : string;
@@ -66,30 +66,36 @@ export type RangeParams = {
     limit? : number;
 };
 
-export type PortalRanges<U extends GenericPortalData> = {[key in keyof U] : RangeParams};
+export type PortalRanges<U extends GenericPortalData = GenericPortalData> = {[key in keyof U] : RangeParams};
 
-export type PortalRangesParams<U extends GenericPortalData> = {
+export type PortalRangesParams<U extends GenericPortalData = GenericPortalData> = {
     'portalRanges'? : PortalRanges<U>;
 };
 
-export type GetParams<U extends GenericPortalData> = ScriptParams & PortalRangesParams<U> & {
+export type GetParams<U extends GenericPortalData = GenericPortalData> = ScriptParams & PortalRangesParams<U> & {
     'layout.response'? : string;
 };
 
-export type Sort<T extends FieldData> = {
+export type Sort<T extends FieldData = FieldData> = {
     fieldName : keyof T;
     sortOrder : 'ascend' | 'descend' | string;
 };
 
-export type ListParams<T extends FieldData, U extends GenericPortalData> = GetParams<U> & RangeParams & {
+export type ListParams<
+    T extends FieldData = FieldData,
+    U extends GenericPortalData = GenericPortalData
+> = GetParams<U> & RangeParams & {
     sort? : Sort<T> | Array<Sort<T>>;
 };
 
-export type GetResponse<T extends FieldData, U extends GenericPortalData> = ScriptResponse & {
+export type GetResponse<
+    T extends FieldData = FieldData,
+    U extends GenericPortalData = GenericPortalData
+> = ScriptResponse & {
     data : Array<Record<T, U>>;
 };
 
-export type Query<T extends FieldData> = Partial<T> & {
+export type Query<T extends FieldData = FieldData> = Partial<T> & {
     omit? : boolean;
 };
 
@@ -98,7 +104,7 @@ export type File = {
     buffer : Buffer;
 };
 
-export default class Layout<T extends FieldData, U extends GenericPortalData>
+export default class Layout<T extends FieldData = FieldData, U extends GenericPortalData = GenericPortalData>
 {
     public constructor(private layout : string, private client : Client)
     {
