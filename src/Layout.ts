@@ -191,6 +191,10 @@ export default class Layout<T extends FieldData = FieldData, U extends GenericPo
             switch (key) {
                 case 'portalRanges':
                     for (const [portalName, range] of Object.entries(value as PortalRanges<U>)) {
+                        if (!range) {
+                            continue;
+                        }
+
                         if (range.offset !== undefined) {
                             searchParams.set(`_offset.${portalName}`, range.offset.toString());
                         }
@@ -226,6 +230,10 @@ export default class Layout<T extends FieldData = FieldData, U extends GenericPo
 
                 case 'portalRanges':
                     for (const [portalName, range] of Object.entries(value as PortalRanges<U>)) {
+                        if (!range) {
+                            continue;
+                        }
+
                         if (range.offset !== undefined) {
                             searchParams.set(`_offset.${portalName}`, range.offset.toString());
                         }
@@ -267,6 +275,10 @@ export default class Layout<T extends FieldData = FieldData, U extends GenericPo
 
                 case 'portalRanges':
                     for (const [portalName, range] of Object.entries(value as PortalRanges<U>)) {
+                        if (!range) {
+                            continue;
+                        }
+
                         if (range.offset !== undefined) {
                             request[`offset.${portalName}`] = range.offset.toString();
                         }
