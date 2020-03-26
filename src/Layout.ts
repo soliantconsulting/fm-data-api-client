@@ -82,11 +82,11 @@ export type Sort<T extends FieldData> = {
 };
 
 export type ListParams<T extends FieldData, U extends GenericPortalData> = GetParams<U> & RangeParams & {
-    sort? : Sort<T> | Sort<T>[];
+    sort? : Sort<T> | Array<Sort<T>>;
 };
 
 export type GetResponse<T extends FieldData, U extends GenericPortalData> = ScriptResponse & {
-    data : Record<T, U>[];
+    data : Array<Record<T, U>>;
 };
 
 export type Query<T extends FieldData> = Partial<T> & {
@@ -237,7 +237,7 @@ export default class Layout<T extends FieldData, U extends GenericPortalData>
     }
 
     public async find(
-        query : Query<T> | Query<T>[],
+        query : Query<T> | Array<Query<T>>,
         params : ListParams<T, U> = {},
         ignoreEmptyResult = false
     ) : Promise<GetResponse<T, U>>
