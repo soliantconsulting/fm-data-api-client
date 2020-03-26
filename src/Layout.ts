@@ -6,15 +6,20 @@ import Client, {FileMakerError} from './Client';
 export type FieldValue = string | number | boolean;
 export type FieldData = {[key : string] : FieldValue};
 
-export type Record = {
-    fieldData : FieldData;
+export type GenericPortalData = {
+    [key : string] : {
+        [key : string] : FieldValue;
+    };
+};
+
+export type Record<T extends FieldData, U extends GenericPortalData> = {
+    fieldData : T;
     recordId : string;
     modId : string;
     portalData : {
-        [key : string] : Array<{
+        [key in keyof U] : Array<U[key] & {
             recordId : string;
             modId : string;
-            [key : string] : FieldValue;
         }>;
     };
 };
@@ -61,32 +66,30 @@ export type RangeParams = {
     limit? : number;
 };
 
-export type PortalRanges = {[key : string] : RangeParams};
+export type PortalRanges<U extends GenericPortalData> = {[key in keyof U] : RangeParams};
 
-export type PortalRangesParams = {
-    'portalRanges'? : PortalRanges;
+export type PortalRangesParams<U extends GenericPortalData> = {
+    'portalRanges'? : PortalRanges<U>;
 };
 
-export type GetParams = ScriptParams & PortalRangesParams & {
+export type GetParams<U extends GenericPortalData> = ScriptParams & PortalRangesParams<U> & {
     'layout.response'? : string;
 };
 
-export type Sort = {
-    fieldName : string;
+export type Sort<T extends FieldData> = {
+    fieldName : keyof T;
     sortOrder : 'ascend' | 'descend' | string;
 };
 
-export type ListParams = GetParams & RangeParams & {
-    sort? : Sort | Sort[];
+export type ListParams<T extends FieldData, U extends GenericPortalData> = GetParams<U> & RangeParams & {
+    sort? : Sort<T> | Sort<T>[];
 };
 
-export type GetResponse = ScriptResponse & {
-    data : Record[];
+export type GetResponse<T extends FieldData, U extends GenericPortalData> = ScriptResponse & {
+    data : Record<T, U>[];
 };
 
-export type Query = {
-    [key : string] : FieldValue;
-} & {
+export type Query<T extends FieldData> = Partial<T> & {
     omit? : boolean;
 };
 
@@ -95,13 +98,13 @@ export type File = {
     buffer : Buffer;
 };
 
-export default class Layout
+export default class Layout<T extends FieldData, U extends GenericPortalData>
 {
     public constructor(private layout : string, private client : Client)
     {
     }
 
-    public async create(fieldData : FieldData, params : CreateParams = {}) : Promise<CreateResponse>
+    public async create(fieldData : Partial<T>, params : CreateParams = {}) : Promise<CreateResponse>
     {
         const request : {[key : string] : any} = {fieldData};
 
@@ -115,7 +118,7 @@ export default class Layout
         });
     }
 
-    public async update(recordId : number, fieldData : FieldData, params : UpdateParams = {}) : Promise<UpdateResponse>
+    public async update(recordId : number, fieldData : Partial<T>, params : UpdateParams = {}) : Promise<UpdateResponse>
     {
         const request : {[key : string] : any} = {fieldData};
 
@@ -172,14 +175,14 @@ export default class Layout
         );
     }
 
-    public async get(recordId : number, params : GetParams = {}) : Promise<GetResponse>
+    public async get(recordId : number, params : GetParams<U> = {}) : Promise<GetResponse<T, U>>
     {
         const searchParams = new URLSearchParams();
 
         for (const [key, value] of Object.entries(params)) {
             switch (key) {
                 case 'portalRanges':
-                    for (const [portalName, range] of Object.entries(value as PortalRanges)) {
+                    for (const [portalName, range] of Object.entries(value as PortalRanges<U>)) {
                         if (range.offset !== undefined) {
                             searchParams.set(`_offset.${portalName}`, range.offset.toString());
                         }
@@ -198,7 +201,7 @@ export default class Layout
         return this.client.request(`layouts/${this.layout}/records/${recordId}?${searchParams}`);
     }
 
-    public async range(params : ListParams = {}) : Promise<GetResponse>
+    public async range(params : ListParams<T, U> = {}) : Promise<GetResponse<T, U>>
     {
         const searchParams = new URLSearchParams();
 
@@ -214,7 +217,7 @@ export default class Layout
                     break;
 
                 case 'portalRanges':
-                    for (const [portalName, range] of Object.entries(value as PortalRanges)) {
+                    for (const [portalName, range] of Object.entries(value as PortalRanges<U>)) {
                         if (range.offset !== undefined) {
                             searchParams.set(`_offset.${portalName}`, range.offset.toString());
                         }
@@ -234,10 +237,10 @@ export default class Layout
     }
 
     public async find(
-        query : Query | Query[],
-        params : ListParams = {},
+        query : Query<T> | Query<T>[],
+        params : ListParams<T, U> = {},
         ignoreEmptyResult = false
-    ) : Promise<GetResponse>
+    ) : Promise<GetResponse<T, U>>
     {
         const request : {[key : string] : any} = {
             query: Array.isArray(query) ? query : [query],
@@ -255,7 +258,7 @@ export default class Layout
                     break;
 
                 case 'portalRanges':
-                    for (const [portalName, range] of Object.entries(value as PortalRanges)) {
+                    for (const [portalName, range] of Object.entries(value as PortalRanges<U>)) {
                         if (range.offset !== undefined) {
                             request[`offset.${portalName}`] = range.offset.toString();
                         }

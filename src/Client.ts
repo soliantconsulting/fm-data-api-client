@@ -1,5 +1,5 @@
 import fetch, {Headers, RequestInit} from 'node-fetch';
-import Layout from './Layout';
+import Layout, {FieldData, GenericPortalData} from './Layout';
 
 export class FileMakerError extends Error
 {
@@ -26,9 +26,12 @@ export default class Client
     {
     }
 
-    public layout(layout : string) : Layout
+    public layout<
+        T extends FieldData = FieldData,
+        U extends GenericPortalData = GenericPortalData
+    >(layout : string) : Layout<T, U>
     {
-        return new Layout(layout, this);
+        return new Layout<T, U>(layout, this);
     }
 
     public async request(path : string, request? : RequestInit) : Promise<any>
