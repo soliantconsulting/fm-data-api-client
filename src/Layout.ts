@@ -66,7 +66,7 @@ export type RangeParams = {
     limit? : number;
 };
 
-export type PortalRanges<U extends GenericPortalData = GenericPortalData> = {[key in keyof U] : RangeParams};
+export type PortalRanges<U extends GenericPortalData = GenericPortalData> = Partial<{[key in keyof U] : RangeParams}>;
 
 export type PortalRangesParams<U extends GenericPortalData = GenericPortalData> = {
     'portalRanges'? : PortalRanges<U>;
@@ -95,7 +95,9 @@ export type GetResponse<
     data : Array<Record<T, U>>;
 };
 
-export type Query<T extends FieldData = FieldData> = Partial<T> & {
+export type Query<T extends FieldData = FieldData> = Partial<{
+    [key in keyof T] : T[key] | string;
+}> & {
     omit? : boolean;
 };
 

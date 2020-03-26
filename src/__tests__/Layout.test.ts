@@ -10,6 +10,7 @@ const typeTesting = async () => {
 
     type SpecificFieldData = {
         bar : string;
+        baz : number;
     };
     type SpecificPortalData = {
         foo: {
@@ -18,7 +19,7 @@ const typeTesting = async () => {
     };
 
     const specificLayout = client.layout<SpecificFieldData, SpecificPortalData>('bar');
-    const result2 = await specificLayout.find({bar: 'baz'});
+    const result2 = await specificLayout.find({baz: 'baz'});
     result2.data[0].portalData.foo[0].bar;
 };
 
