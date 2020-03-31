@@ -1,4 +1,5 @@
 import {DateTimeFormatter, LocalDate, LocalDateTime, LocalTime} from '@js-joda/core';
+import {Numerish} from './Layout';
 
 /**
  * Quotes a string for use in queries.
@@ -11,7 +12,7 @@ export const quote = (value : string) : string => value.replace(/([\\=!<≤>≥�
  * This utility function works the same way as FileMaker when it comes to interpret string values as numbers. An empty
  * string will be interpreted as <pre>null</pre>.
  */
-export const parseNumber = (value : string | number) : number | null => {
+export const parseNumber = (value : Numerish) : number | null => {
     if (typeof value === 'number') {
         return value;
     }
@@ -41,7 +42,7 @@ export const parseNumber = (value : string | number) : number | null => {
  *
  * This function will interpret any non-zero and non-empty value as true.
  */
-export const parseBoolean = (value : string | number) : boolean => {
+export const parseBoolean = (value : Numerish) : boolean => {
     if (typeof value === 'number') {
         return value !== 0;
     }

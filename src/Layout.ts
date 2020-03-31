@@ -3,7 +3,8 @@ import fs from 'fs';
 import intoStream from 'into-stream';
 import Client, {FileMakerError} from './Client';
 
-export type FieldValue = string | number | boolean;
+export type Numerish = string | number;
+export type FieldValue = string | Numerish;
 export type FieldData = {[key : string] : FieldValue};
 
 export type GenericPortalData = {
