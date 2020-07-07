@@ -34,16 +34,16 @@
   "devDependencies": {
     "@types/form-data": "^2.5.0",
     "@types/into-stream": "^3.1.1",
-    "@types/jest": "^24.9.0",
-    "@types/node": "^13.1.7",
-    "jest": "^24.9.0",
-    "ts-jest": "^24.3.0",
-    "tslint": "^5.20.1",
-    "typescript": "^3.7.4"
+    "@types/jest": "^26.0.4",
+    "@types/node": "^14.0.18",
+    "@types/node-fetch": "^2.5.7",
+    "jest": "^26.1.0",
+    "ts-jest": "^26.1.1",
+    "tslint": "^6.1.2",
+    "typescript": "^3.9.6"
   },
   "dependencies": {
-    "@js-joda/core": "^2.0.0",
-    "@types/node-fetch": "^2.5.4",
+    "@js-joda/core": "^3.0.0",
     "form-data": "^3.0.0",
     "into-stream": "^5.1.1",
     "node-fetch": "^2.6.0"
