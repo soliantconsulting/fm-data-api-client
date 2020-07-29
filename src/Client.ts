@@ -51,6 +51,7 @@ export default class Client
             throw new FileMakerError(data.messages[0].code, data.messages[0].message);
         }
 
+        this.lastCall = Date.now();
         return (await response.json()).response;
     }
 
