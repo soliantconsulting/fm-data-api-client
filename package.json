@@ -1,6 +1,6 @@
 {
   "name": "fm-data-api-client",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "FileMaker Data API Client",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
