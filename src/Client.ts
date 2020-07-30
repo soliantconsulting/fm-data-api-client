@@ -1,3 +1,5 @@
+import http from 'http';
+import https from 'https';
 import fetch, {Headers, RequestInit} from 'node-fetch';
 import Layout, {FieldData, GenericPortalData} from './Layout';
 
@@ -14,16 +16,20 @@ export class FileMakerError extends Error
 
 export default class Client
 {
+    private readonly agent : http.Agent;
     private token : string | null = null;
     private lastCall = 0;
 
     public constructor(
-        private uri : string,
-        private database : string,
-        private username : string,
-        private password : string
+        private readonly uri : string,
+        private readonly database : string,
+        private readonly username : string,
+        private readonly password : string
     )
     {
+        this.agent = new (uri.startsWith('https:') ? https : http).Agent({
+            keepAlive: true,
+        });
     }
 
     public layout<
@@ -43,6 +49,7 @@ export default class Client
             }),
             request
         );
+        request.agent = this.agent;
 
         const response = await fetch(`${this.uri}/fmi/data/v1/databases/${this.database}/${path}`, request);
 
@@ -66,6 +73,7 @@ export default class Client
             headers: {
                 'Content-Type': 'application/json',
             },
+            agent: this.agent,
         });
 
         this.token = null;
@@ -87,6 +95,7 @@ export default class Client
             method: 'POST',
             body: '{}',
             headers,
+            agent: this.agent,
         });
 
         if (!response.ok) {
