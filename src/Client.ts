@@ -119,21 +119,13 @@ export default class Client
             request = {};
         }
 
-        if (!request.headers) {
-            request.headers = {};
-        }
+        request.headers = new Headers(request.headers);
 
         if (request.headers instanceof Headers) {
             for (const header of headers) {
-                request.headers.append(header[0], header[1]);
-            }
-        } else if (Array.isArray(request.headers)) {
-            for (const header of headers) {
-                request.headers.push(header);
-            }
-        } else {
-            for (const header of headers) {
-                request.headers[header[0]] = header[1];
+                if (!request.headers.has(header[0])) {
+                    request.headers.append(header[0], header[1]);
+                }
             }
         }
 
