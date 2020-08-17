@@ -121,11 +121,9 @@ export default class Client
 
         request.headers = new Headers(request.headers);
 
-        if (request.headers instanceof Headers) {
-            for (const header of headers) {
-                if (!request.headers.has(header[0])) {
-                    request.headers.append(header[0], header[1]);
-                }
+        for (const header of headers) {
+            if (!request.headers.has(header[0])) {
+                request.headers.append(header[0], header[1]);
             }
         }
 
