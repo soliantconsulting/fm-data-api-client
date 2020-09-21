@@ -2,6 +2,12 @@
 
 NodeJS client for the FileMaker Data API, written in TypeScript. This library supports all FileMaker 17 features.
 
+## Requirements
+
+ - Node 0.12+
+ - node-fetch version 2.6 or higher
+ - Optionally @js-joda/core 3.0 or higher, when using the `DateUtils` helper.
+
 ## Connecting to a server
 
 In order to connect to a server, create a new instance of a client:
