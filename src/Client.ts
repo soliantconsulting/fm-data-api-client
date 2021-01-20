@@ -40,7 +40,7 @@ export default class Client
         return new Layout<T, U>(layout, this);
     }
 
-    public async request(path : string, request? : RequestInit) : Promise<any>
+    public async request(path : string, request? : RequestInit, firstTry = true) : Promise<any>
     {
         request = Client.injectHeaders(
             new Headers({
@@ -55,6 +55,12 @@ export default class Client
 
         if (!response.ok) {
             const data = await response.json();
+
+            if (firstTry && data.messages[0].code === '952') {
+                this.token = null;
+                return this.request(path, request, false);
+            }
+
             throw new FileMakerError(data.messages[0].code, data.messages[0].message);
         }
 
