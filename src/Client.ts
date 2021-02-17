@@ -55,6 +55,9 @@ export default class Client
 
         if (!response.ok) {
             const data = await response.json();
+            if (data.messages[0].code === '952') {
+                await this.clearToken();
+            }
             throw new FileMakerError(data.messages[0].code, data.messages[0].message);
         }
 
