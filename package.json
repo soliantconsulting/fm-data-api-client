@@ -32,7 +32,7 @@
   "author": "Soliant Consulting",
   "license": "MIT",
   "devDependencies": {
-    "@js-joda/core": "^3.2.0",
+    "@js-joda/core": "^4.2.1",
     "@types/form-data": "^2.5.0",
     "@types/into-stream": "^3.1.1",
     "@types/jest": "^26.0.14",
@@ -49,7 +49,7 @@
     "into-stream": "^6.0.0"
   },
   "peerDependencies": {
-    "@js-joda/core": "^3.0.0",
+    "@js-joda/core": "^3.0.0 || ^4.0.0",
     "node-fetch": "^2.6.0"
   }
 }
