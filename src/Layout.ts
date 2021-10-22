@@ -146,7 +146,7 @@ export default class Layout<T extends FieldData = FieldData, U extends GenericPo
         const searchParams = new URLSearchParams();
 
         for (const [key, value] of Object.entries(params)) {
-            searchParams.set(key, value as string);
+            searchParams.set(key, value);
         }
 
         return this.client.request(`layouts/${this.layout}/records/${recordId}?${searchParams}`, {
