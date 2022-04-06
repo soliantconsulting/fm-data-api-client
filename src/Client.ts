@@ -2,6 +2,7 @@ import http from 'http';
 import https from 'https';
 import fetch, {Headers, RequestInit} from 'node-fetch';
 import Layout, {FieldData, GenericPortalData} from './Layout';
+import AmazonCognitoIdentity from 'amazon-cognito-identity-js';
 
 export class FileMakerError extends Error
 {
@@ -24,7 +25,8 @@ export default class Client
         private readonly uri : string,
         private readonly database : string,
         private readonly username : string,
-        private readonly password : string
+        private readonly password : string,
+        private readonly isCloud : boolean = false
     )
     {
         this.agent = new (uri.startsWith('https:') ? https : http).Agent({
@@ -86,10 +88,16 @@ export default class Client
             return this.token;
         }
 
-        const headers = {
+        let headers = {
             'Content-Type': 'application/json',
             'Authorization': `Basic ${Buffer.from(`${this.username}:${this.password}`).toString('base64')}`,
         };
+        if (this.isCloud) {
+            headers = {
+                'Content-Type': 'application/json',
+                'Authorization': `FMID ${await this.getCloudToken()}`,
+            };
+        }
 
         const response = await fetch(`${this.uri}/fmi/data/v1/databases/${this.database}/sessions`, {
             method: 'POST',
@@ -111,6 +119,37 @@ export default class Client
 
         this.lastCall = Date.now();
         return this.token;
+    }
+
+    private async getCloudToken() : Promise<string>
+    {
+        const poolData = {
+            UserPoolId : 'us-west-2_NqkuZcXQY',
+            ClientId : '4l9rvl4mv5es1eep1qe97cautn',
+        };
+        const authenticationData = {
+            Username : this.username,
+            Password : this.password,
+        };
+
+        const authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails(authenticationData);
+        const userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+        const userData = {
+            Username : this.username,
+            Pool : userPool,
+        };
+        const cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
+
+        return new Promise((resolve, reject) =>
+                               cognitoUser.authenticateUser(authenticationDetails, {
+                                   onSuccess(result) {
+                                       resolve(result.getIdToken().getJwtToken());
+                                   },
+                                   onFailure(err) {
+                                       reject(err);
+                                   },
+                               }));
+
     }
 
     private static injectHeaders(headers : Headers, request? : RequestInit) : RequestInit
