@@ -2,7 +2,7 @@ import http from 'http';
 import https from 'https';
 import fetch, {Headers, RequestInit} from 'node-fetch';
 import Layout, {FieldData, GenericPortalData} from './Layout';
-import AmazonCognitoIdentity from 'amazon-cognito-identity-js';
+import * as AmazonCognitoIdentity from 'amazon-cognito-identity-js';
 
 export class FileMakerError extends Error
 {
