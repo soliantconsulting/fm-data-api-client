@@ -1,20 +1,20 @@
 import {LocalDate, LocalDateTime, LocalTime} from '@js-joda/core';
-import {DateUtil, parseBoolean, parseNumber, quote} from '../src/Utils';
+import {utils} from '../src';
 
 describe('Utils', () => {
     describe('quote', () => {
         it('should quote all special characters', () => {
-            expect(quote('\\\\=!<≤>≥…?@#*"~//')).toBe('\\\\\\\\\\=\\!\\<\\≤\\>\\≥\\…\\?\\@\\#\\*\\"\\~\\//');
+            expect(utils.quote('\\\\=!<≤>≥…?@#*"~//')).toBe('\\\\\\\\\\=\\!\\<\\≤\\>\\≥\\…\\?\\@\\#\\*\\"\\~\\//');
         });
 
         it('should not quote standard characters', () => {
-            expect(quote('a_ \'[{')).toBe('a_ \'[{');
+            expect(utils.quote('a_ \'[{')).toBe('a_ \'[{');
         });
     });
 
     describe('parseNumber', () => {
         it('should return as number as is', () => {
-            expect(parseNumber(5.3)).toBe(5.3);
+            expect(utils.parseNumber(5.3)).toBe(5.3);
         });
 
         const stringCases : Array<[string, number | null]> = [
@@ -30,7 +30,7 @@ describe('Utils', () => {
         test.each(stringCases)(
             'should parse "%s" as %p',
             (input, expected) => {
-                expect(parseNumber(input)).toBe(expected);
+                expect(utils.parseNumber(input)).toBe(expected);
             },
         );
     });
@@ -49,13 +49,13 @@ describe('Utils', () => {
         test.each(cases)(
             'should parse %p as %p',
             (input, expected) => {
-                expect(parseBoolean(input)).toBe(expected);
+                expect(utils.parseBoolean(input)).toBe(expected);
             },
         );
     });
 
     describe('DateUtil', () => {
-        const dateUtil = new DateUtil();
+        const dateUtil = new utils.DateUtil();
 
         it('should successfully parse a date', () => {
             expect(dateUtil.parseDate('02/01/2019').toString()).toBe('2019-02-01');
