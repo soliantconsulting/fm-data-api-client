@@ -43,13 +43,7 @@ export const parseNumber = (value : Numerish) : number | null => {
  *
  * This function will interpret any non-zero and non-empty value as true.
  */
-export const parseBoolean = (value : Numerish) : boolean => {
-    if (typeof value === 'number') {
-        return value !== 0;
-    }
-
-    return value !== '0' && value !== '';
-};
+export const parseBoolean = (value : Numerish) : boolean => value !== 0 && value !== '0' && value !== '';
 
 /**
  * Date utility for working with dates, times and time stamps.

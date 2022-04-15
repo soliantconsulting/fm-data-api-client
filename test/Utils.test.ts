@@ -1,7 +1,17 @@
 import {LocalDate, LocalDateTime, LocalTime} from '@js-joda/core';
-import {DateUtil, parseNumber} from '../src/Utils';
+import {DateUtil, parseBoolean, parseNumber, quote} from '../src/Utils';
 
 describe('Utils', () => {
+    describe('quote', () => {
+        it('should quote all special characters', () => {
+            expect(quote('\\\\=!<≤>≥…?@#*"~//')).toBe('\\\\\\\\\\=\\!\\<\\≤\\>\\≥\\…\\?\\@\\#\\*\\"\\~\\//');
+        });
+
+        it('should not quote standard characters', () => {
+            expect(quote('a_ \'[{')).toBe('a_ \'[{');
+        });
+    });
+
     describe('parseNumber', () => {
         it('should return as number as is', () => {
             expect(parseNumber(5.3)).toBe(5.3);
@@ -21,6 +31,25 @@ describe('Utils', () => {
             'should parse "%s" as %p',
             (input, expected) => {
                 expect(parseNumber(input)).toBe(expected);
+            },
+        );
+    });
+
+    describe('parseBoolean', () => {
+        const cases : Array<[string | number, boolean]> = [
+            [0, false],
+            [1, true],
+            [-1, true],
+            ['', false],
+            ['0', false],
+            ['1', true],
+            ['test', true],
+        ];
+
+        test.each(cases)(
+            'should parse %p as %p',
+            (input, expected) => {
+                expect(parseBoolean(input)).toBe(expected);
             },
         );
     });
