@@ -1,5 +1,5 @@
 import {DateTimeFormatter, LocalDate, LocalDateTime, LocalTime} from '@js-joda/core';
-import {Numerish} from './Layout';
+import type {Numerish} from './Layout';
 
 /**
  * Quotes a string for use in queries.
@@ -19,7 +19,8 @@ export const parseNumber = (value : Numerish) : number | null => {
 
     value = value.replace(
         /^[^\d\-.]*(-?)([^.]*)(\.?)(.*)$/g,
-        (substring, ...args) => `${args[0]}${args[1].replace(/[^\d]+/g, '')}${args[2]}${args[3].replace(/[^\d]+/g, '')}`
+        (substring, ...args) => `${args[0] as string}${(args[1] as string).replace(/[^\d]+/g, '')}`
+            + `${args[2] as string}${(args[3] as string).replace(/[^\d]+/g, '')}`
     );
 
     if (value === '') {
@@ -30,7 +31,7 @@ export const parseNumber = (value : Numerish) : number | null => {
         return 0;
     }
 
-    if (value.indexOf('.') === 0) {
+    if (value.startsWith('.')) {
         value = `0${value}`;
     }
 
@@ -53,46 +54,38 @@ export const parseBoolean = (value : Numerish) : boolean => {
 /**
  * Date utility for working with dates, times and time stamps.
  */
-export class DateUtil
-{
+export class DateUtil {
     private readonly dateFormatter : DateTimeFormatter;
     private readonly timeFormatter : DateTimeFormatter;
     private readonly timeStampFormatter : DateTimeFormatter;
 
-    public constructor(dateFormat = 'MM/dd/yyyy', timeFormat = 'HH:mm:ss', timeStampFormat = 'MM/dd/yyyy HH:mm:ss')
-    {
+    public constructor(dateFormat = 'MM/dd/yyyy', timeFormat = 'HH:mm:ss', timeStampFormat = 'MM/dd/yyyy HH:mm:ss') {
         this.dateFormatter = DateTimeFormatter.ofPattern(dateFormat);
         this.timeFormatter = DateTimeFormatter.ofPattern(timeFormat);
         this.timeStampFormatter = DateTimeFormatter.ofPattern(timeStampFormat);
     }
 
-    public parseDate(value : string) : LocalDate
-    {
+    public parseDate(value : string) : LocalDate {
         return LocalDate.parse(value, this.dateFormatter);
     }
 
-    public parseTime(value : string) : LocalTime
-    {
+    public parseTime(value : string) : LocalTime {
         return LocalTime.parse(value, this.timeFormatter);
     }
 
-    public parseTimeStamp(value : string) : LocalDateTime
-    {
+    public parseTimeStamp(value : string) : LocalDateTime {
         return LocalDateTime.parse(value, this.timeStampFormatter);
     }
 
-    public formatDate(value : LocalDate) : string
-    {
+    public formatDate(value : LocalDate) : string {
         return value.format(this.dateFormatter);
     }
 
-    public formatTime(value : LocalTime) : string
-    {
+    public formatTime(value : LocalTime) : string {
         return value.format(this.timeFormatter);
     }
 
-    public formatTimeStamp(value : LocalDateTime) : string
-    {
+    public formatTimeStamp(value : LocalDateTime) : string {
         return value.format(this.timeStampFormatter);
     }
 }

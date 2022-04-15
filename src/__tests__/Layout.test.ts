@@ -1,5 +1,6 @@
 import Client from '../Client';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const typeTesting = async () => {
     const client = new Client('a', 'b', 'c', 'd');
     const genericLayout = client.layout('foo');
@@ -13,9 +14,9 @@ const typeTesting = async () => {
         baz : number;
     };
     type SpecificPortalData = {
-        foo: {
-            bar: string,
-        },
+        foo : {
+            bar : string;
+        };
     };
 
     const specificLayout = client.layout<SpecificFieldData, SpecificPortalData>('bar');

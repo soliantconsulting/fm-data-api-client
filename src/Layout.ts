@@ -1,19 +1,17 @@
-import FormData from 'form-data';
 import fs from 'fs';
+import {URLSearchParams} from 'url';
+import FormData from 'form-data';
 import intoStream from 'into-stream';
-import Client, {FileMakerError} from './Client';
+import type Client from './Client';
+import {FileMakerError} from './Client';
 
 export type Numerish = string | number;
 export type FieldValue = string | Numerish;
-export type FieldData = {[key : string] : FieldValue};
+export type FieldData = Record<string, FieldValue>;
 
-export type GenericPortalData = {
-    [key : string] : {
-        [key : string] : FieldValue;
-    };
-};
+export type GenericPortalData = Record<string, Record<string, FieldValue>>;
 
-export type Record<T extends FieldData = FieldData, U extends GenericPortalData = GenericPortalData> = {
+export type RecordResponse<T extends FieldData = FieldData, U extends GenericPortalData = GenericPortalData> = {
     fieldData : T;
     recordId : string;
     modId : string;
@@ -26,21 +24,25 @@ export type Record<T extends FieldData = FieldData, U extends GenericPortalData 
 };
 
 export type ScriptParams = {
-    'script'? : string;
-    'script.param'? : string;
-    'script.prerequest'? : string;
-    'script.prerequest.param'? : string;
-    'script.presort'? : string;
-    'script.presort.param'? : string;
+    /* eslint-disable @typescript-eslint/naming-convention */
+    'script' ?: string;
+    'script.param' ?: string;
+    'script.prerequest' ?: string;
+    'script.prerequest.param' ?: string;
+    'script.presort' ?: string;
+    'script.presort.param' ?: string;
+    /* eslint-enable @typescript-eslint/naming-convention */
 };
 
 export type ScriptResponse = {
-    'scriptResult'? : string;
-    'scriptError'? : string;
-    'scriptResult.prerequest'? : string;
-    'scriptError.prerequest'? : string;
-    'scriptResult.presort'? : string;
-    'scriptError.presort'? : string;
+    /* eslint-disable @typescript-eslint/naming-convention */
+    'scriptResult' ?: string;
+    'scriptError' ?: string;
+    'scriptResult.prerequest' ?: string;
+    'scriptError.prerequest' ?: string;
+    'scriptResult.presort' ?: string;
+    'scriptError.presort' ?: string;
+    /* eslint-enable @typescript-eslint/naming-convention */
 };
 
 export type CreateParams = ScriptParams;
@@ -51,7 +53,7 @@ export type CreateResponse = ScriptResponse & {
 };
 
 export type UpdateParams = CreateParams & {
-    modId? : number;
+    modId ?: number;
 };
 
 export type UpdateResponse = ScriptResponse & {
@@ -63,18 +65,20 @@ export type DeleteParams = ScriptParams;
 export type DeleteResponse = ScriptResponse;
 
 export type RangeParams = {
-    offset? : number;
-    limit? : number;
+    offset ?: number;
+    limit ?: number;
 };
 
 export type PortalRanges<U extends GenericPortalData = GenericPortalData> = Partial<{[key in keyof U] : RangeParams}>;
 
 export type PortalRangesParams<U extends GenericPortalData = GenericPortalData> = {
-    'portalRanges'? : PortalRanges<U>;
+    'portalRanges' ?: PortalRanges<U>;
 };
 
 export type GetParams<U extends GenericPortalData = GenericPortalData> = ScriptParams & PortalRangesParams<U> & {
-    'layout.response'? : string;
+    /* eslint-disable @typescript-eslint/naming-convention */
+    'layout.response' ?: string;
+    /* eslint-enable @typescript-eslint/naming-convention */
 };
 
 export type Sort<T extends FieldData = FieldData> = {
@@ -84,22 +88,22 @@ export type Sort<T extends FieldData = FieldData> = {
 
 export type ListParams<
     T extends FieldData = FieldData,
-    U extends GenericPortalData = GenericPortalData
+    U extends GenericPortalData = GenericPortalData,
 > = GetParams<U> & RangeParams & {
-    sort? : Sort<T> | Array<Sort<T>>;
+    sort ?: Sort<T> | Array<Sort<T>>;
 };
 
 export type GetResponse<
     T extends FieldData = FieldData,
-    U extends GenericPortalData = GenericPortalData
+    U extends GenericPortalData = GenericPortalData,
 > = ScriptResponse & {
-    data : Array<Record<T, U>>;
+    data : Array<RecordResponse<T, U>>;
 };
 
 export type Query<T extends FieldData = FieldData> = Partial<{
     [key in keyof T] : T[key] | string;
 }> & {
-    omit? : boolean;
+    omit ?: boolean;
 };
 
 export type File = {
@@ -107,51 +111,51 @@ export type File = {
     buffer : Buffer;
 };
 
-export default class Layout<T extends FieldData = FieldData, U extends GenericPortalData = GenericPortalData>
-{
-    public constructor(private layout : string, private client : Client)
-    {
+export default class Layout<T extends FieldData = FieldData, U extends GenericPortalData = GenericPortalData> {
+    public constructor(private readonly layout : string, private readonly client : Client) {
     }
 
-    public async create(fieldData : Partial<T>, params : CreateParams = {}) : Promise<CreateResponse>
-    {
-        const request : {[key : string] : any} = {fieldData};
+    public async create(fieldData : Partial<T>, params : CreateParams = {}) : Promise<CreateResponse> {
+        const request : Record<string, unknown> = {fieldData};
 
         for (const [key, value] of Object.entries(params)) {
             request[key] = value;
         }
 
-        return this.client.request(`layouts/${this.layout}/records`, {
+        return this.client.request<CreateResponse>(`layouts/${this.layout}/records`, {
             method: 'POST',
             body: JSON.stringify(request),
         });
     }
 
-    public async update(recordId : number, fieldData : Partial<T>, params : UpdateParams = {}) : Promise<UpdateResponse>
-    {
-        const request : {[key : string] : any} = {fieldData};
+    public async update(
+        recordId : number,
+        fieldData : Partial<T>,
+        params : UpdateParams = {},
+    ) : Promise<UpdateResponse> {
+        const request : Record<string, unknown> = {fieldData};
 
         for (const [key, value] of Object.entries(params)) {
             request[key] = value;
         }
 
-        return this.client.request(`layouts/${this.layout}/records/${recordId}`, {
+        return this.client.request<UpdateResponse>(`layouts/${this.layout}/records/${recordId}`, {
             method: 'PATCH',
             body: JSON.stringify(request),
         });
     }
 
-    public async delete(recordId : number, params : DeleteParams = {}) : Promise<DeleteResponse>
-    {
+    public async delete(recordId : number, params : DeleteParams = {}) : Promise<DeleteResponse> {
         const searchParams = new URLSearchParams();
 
         for (const [key, value] of Object.entries(params)) {
             searchParams.set(key, value);
         }
 
-        return this.client.request(`layouts/${this.layout}/records/${recordId}?${searchParams}`, {
-            method: 'DELETE',
-        });
+        return this.client.request<DeleteResponse>(
+            `layouts/${this.layout}/records/${recordId}?${searchParams.toString()}`,
+            {method: 'DELETE'}
+        );
     }
 
     public async upload(
@@ -159,8 +163,7 @@ export default class Layout<T extends FieldData = FieldData, U extends GenericPo
         recordId : number,
         fieldName : string,
         fieldRepetition = 1
-    ) : Promise<void>
-    {
+    ) : Promise<void> {
         const form = new FormData();
         let stream;
         let options;
@@ -174,7 +177,7 @@ export default class Layout<T extends FieldData = FieldData, U extends GenericPo
 
         form.append('upload', stream, options);
 
-        return this.client.request(
+        await this.client.request(
             `layouts/${this.layout}/records/${recordId}/containers/${fieldName}/${fieldRepetition}`,
             {
                 method: 'POST',
@@ -184,26 +187,13 @@ export default class Layout<T extends FieldData = FieldData, U extends GenericPo
         );
     }
 
-    public async get(recordId : number, params : GetParams<U> = {}) : Promise<GetResponse<T, U>>
-    {
+    public async get(recordId : number, params : GetParams<U> = {}) : Promise<GetResponse<T, U>> {
         const searchParams = new URLSearchParams();
 
         for (const [key, value] of Object.entries(params)) {
             switch (key) {
                 case 'portalRanges':
-                    for (const [portalName, range] of Object.entries(value as PortalRanges<U>)) {
-                        if (!range) {
-                            continue;
-                        }
-
-                        if (range.offset !== undefined) {
-                            searchParams.set(`_offset.${portalName}`, range.offset.toString());
-                        }
-
-                        if (range.limit !== undefined) {
-                            searchParams.set(`_limit.${portalName}`, range.limit.toString());
-                        }
-                    }
+                    this.addPortalRangesToRequest(value as PortalRanges<U>, searchParams);
                     break;
 
                 default:
@@ -211,11 +201,12 @@ export default class Layout<T extends FieldData = FieldData, U extends GenericPo
             }
         }
 
-        return this.client.request(`layouts/${this.layout}/records/${recordId}?${searchParams}`);
+        return this.client.request<GetResponse<T, U>>(
+            `layouts/${this.layout}/records/${recordId}?${searchParams.toString()}`
+        );
     }
 
-    public async range(params : ListParams<T, U> = {}) : Promise<GetResponse<T, U>>
-    {
+    public async range(params : ListParams<T, U> = {}) : Promise<GetResponse<T, U>> {
         const searchParams = new URLSearchParams();
 
         for (const [key, value] of Object.entries(params)) {
@@ -230,19 +221,7 @@ export default class Layout<T extends FieldData = FieldData, U extends GenericPo
                     break;
 
                 case 'portalRanges':
-                    for (const [portalName, range] of Object.entries(value as PortalRanges<U>)) {
-                        if (!range) {
-                            continue;
-                        }
-
-                        if (range.offset !== undefined) {
-                            searchParams.set(`_offset.${portalName}`, range.offset.toString());
-                        }
-
-                        if (range.limit !== undefined) {
-                            searchParams.set(`_limit.${portalName}`, range.limit.toString());
-                        }
-                    }
+                    this.addPortalRangesToRequest(value as PortalRanges<U>, searchParams);
                     break;
 
                 default:
@@ -250,16 +229,15 @@ export default class Layout<T extends FieldData = FieldData, U extends GenericPo
             }
         }
 
-        return this.client.request(`layouts/${this.layout}/records?${searchParams}`);
+        return this.client.request<GetResponse<T, U>>(`layouts/${this.layout}/records?${searchParams.toString()}`);
     }
 
     public async find(
         query : Query<T> | Array<Query<T>>,
         params : ListParams<T, U> = {},
         ignoreEmptyResult = false
-    ) : Promise<GetResponse<T, U>>
-    {
-        const request : {[key : string] : any} = {
+    ) : Promise<GetResponse<T, U>> {
+        const request : Record<string, unknown> = {
             query: Array.isArray(query) ? query : [query],
         };
 
@@ -275,19 +253,7 @@ export default class Layout<T extends FieldData = FieldData, U extends GenericPo
                     break;
 
                 case 'portalRanges':
-                    for (const [portalName, range] of Object.entries(value as PortalRanges<U>)) {
-                        if (!range) {
-                            continue;
-                        }
-
-                        if (range.offset !== undefined) {
-                            request[`offset.${portalName}`] = range.offset.toString();
-                        }
-
-                        if (range.limit !== undefined) {
-                            request[`limit.${portalName}`] = range.limit.toString();
-                        }
-                    }
+                    this.addPortalRangesToRequest(value as PortalRanges<U>, request);
                     break;
 
                 default:
@@ -296,7 +262,7 @@ export default class Layout<T extends FieldData = FieldData, U extends GenericPo
         }
 
         try {
-            return await this.client.request(`layouts/${this.layout}/_find`, {
+            return await this.client.request<GetResponse<T, U>>(`layouts/${this.layout}/_find`, {
                 method: 'POST',
                 body: JSON.stringify(request),
             });
@@ -306,6 +272,33 @@ export default class Layout<T extends FieldData = FieldData, U extends GenericPo
             }
 
             throw e;
+        }
+    }
+
+    private addPortalRangesToRequest(
+        portalRanges : PortalRanges<U>,
+        request : Record<string, unknown> | URLSearchParams
+    ) : void {
+        for (const [portalName, range] of Object.entries(portalRanges)) {
+            if (!range) {
+                continue;
+            }
+
+            if (range.offset !== undefined) {
+                if (request instanceof URLSearchParams) {
+                    request.set(`_offset.${portalName}`, range.offset.toString());
+                } else {
+                    request[`offset.${portalName}`] = range.offset.toString();
+                }
+            }
+
+            if (range.limit !== undefined) {
+                if (request instanceof URLSearchParams) {
+                    request.set(`_limit.${portalName}`, range.limit.toString());
+                } else {
+                    request[`limit.${portalName}`] = range.limit.toString();
+                }
+            }
         }
     }
 }

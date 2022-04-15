@@ -1,21 +1,31 @@
 import http from 'http';
 import https from 'https';
-import fetch, {Headers, RequestInit} from 'node-fetch';
-import Layout, {FieldData, GenericPortalData} from './Layout';
+import type {RequestInit} from 'node-fetch';
+import fetch, {Headers} from 'node-fetch';
+import type {FieldData, GenericPortalData} from './Layout';
+import Layout from './Layout';
 
-export class FileMakerError extends Error
-{
+export class FileMakerError extends Error {
     public readonly code : string;
 
-    public constructor(code : string, message : string)
-    {
+    public constructor(code : string, message : string) {
         super(message);
         this.code = code;
     }
 }
 
-export default class Client
-{
+type FileMakerErrorResponse = {
+    messages : Array<{
+        code : string;
+        message : string;
+    }>;
+};
+
+type FileMakerResponse<T> = {
+    response : T;
+};
+
+export default class Client {
     private readonly agent : http.Agent;
     private token : string | null = null;
     private lastCall = 0;
@@ -25,8 +35,7 @@ export default class Client
         private readonly database : string,
         private readonly username : string,
         private readonly password : string
-    )
-    {
+    ) {
         this.agent = new (uri.startsWith('https:') ? https : http).Agent({
             keepAlive: true,
         });
@@ -34,14 +43,12 @@ export default class Client
 
     public layout<
         T extends FieldData = FieldData,
-        U extends GenericPortalData = GenericPortalData
-    >(layout : string) : Layout<T, U>
-    {
+        U extends GenericPortalData = GenericPortalData,
+    >(layout : string) : Layout<T, U> {
         return new Layout<T, U>(layout, this);
     }
 
-    public async request(path : string, request? : RequestInit) : Promise<any>
-    {
+    public async request<T>(path : string, request ?: RequestInit) : Promise<T> {
         request = Client.injectHeaders(
             new Headers({
                 'Content-Type': 'application/json',
@@ -54,16 +61,15 @@ export default class Client
         const response = await fetch(`${this.uri}/fmi/data/v1/databases/${this.database}/${path}`, request);
 
         if (!response.ok) {
-            const data = await response.json();
+            const data = await response.json() as FileMakerErrorResponse;
             throw new FileMakerError(data.messages[0].code, data.messages[0].message);
         }
 
         this.lastCall = Date.now();
-        return (await response.json()).response;
+        return (await response.json() as FileMakerResponse<T>).response;
     }
 
-    public async clearToken() : Promise<void>
-    {
+    public async clearToken() : Promise<void> {
         if (!this.token) {
             return;
         }
@@ -80,8 +86,7 @@ export default class Client
         this.lastCall = 0;
     }
 
-    private async getToken() : Promise<string>
-    {
+    private async getToken() : Promise<string> {
         if (this.token !== null && Date.now() - this.lastCall < 14 * 60 * 1000) {
             return this.token;
         }
@@ -99,7 +104,7 @@ export default class Client
         });
 
         if (!response.ok) {
-            const data = await response.json();
+            const data = await response.json() as FileMakerErrorResponse;
             throw new FileMakerError(data.messages[0].code, data.messages[0].message);
         }
 
@@ -113,8 +118,7 @@ export default class Client
         return this.token;
     }
 
-    private static injectHeaders(headers : Headers, request? : RequestInit) : RequestInit
-    {
+    private static injectHeaders(headers : Headers, request ?: RequestInit) : RequestInit {
         if (!request) {
             request = {};
         }
