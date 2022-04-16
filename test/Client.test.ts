@@ -43,9 +43,10 @@ describe('Client', () => {
                 .get('/fmi/data/v1/databases/db/test')
                 .matchHeader('authorization', 'Bearer foo')
                 .matchHeader('content-type', 'application/json')
-                .reply(200, {});
+                .reply(200, {response: 'test'});
 
-            await client.request('test');
+            const response = await client.request('test');
+            expect(response).toBe('test');
         });
 
         it('should reuse a token for 14 minutes', async () => {
@@ -56,7 +57,7 @@ describe('Client', () => {
                 .get('/fmi/data/v1/databases/db/test')
                 .matchHeader('authorization', 'Bearer foo')
                 .times(2)
-                .reply(200, {});
+                .reply(200, {response: 'test'});
 
             jest.spyOn(Date, 'now').mockImplementation(() => 0);
             await client.request('test');
@@ -72,7 +73,7 @@ describe('Client', () => {
             nock('http://example.com')
                 .get('/fmi/data/v1/databases/db/test')
                 .matchHeader('authorization', 'Bearer foo')
-                .reply(200, {});
+                .reply(200, {response: 'test'});
 
             jest.spyOn(Date, 'now').mockImplementation(() => 0);
             await client.request('test');
@@ -83,7 +84,7 @@ describe('Client', () => {
             nock('http://example.com')
                 .get('/fmi/data/v1/databases/db/test')
                 .matchHeader('authorization', 'Bearer bar')
-                .reply(200, {});
+                .reply(200, {response: 'test'});
 
             jest.spyOn(Date, 'now').mockImplementation(() => 14 * 60 * 1000);
             await client.request('test');
@@ -97,7 +98,7 @@ describe('Client', () => {
                 .reply(200, {}, {'X-FM-Data-Access-Token': 'foo'});
             nock('http://example.com')
                 .get('/fmi/data/v1/databases/db/test')
-                .reply(200, {});
+                .reply(200, {response: 'test'});
 
             await client.request('test');
         });

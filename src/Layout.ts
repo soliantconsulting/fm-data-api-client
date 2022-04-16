@@ -9,7 +9,7 @@ export type Numerish = string | number;
 export type FieldValue = string | Numerish;
 export type FieldData = Record<string, FieldValue>;
 
-export type GenericPortalData = Record<string, Record<string, FieldValue>>;
+export type GenericPortalData = Record<string, Record<string, FieldData>>;
 
 export type RecordResponse<T extends FieldData = FieldData, U extends GenericPortalData = GenericPortalData> = {
     fieldData : T;
@@ -182,7 +182,6 @@ export default class Layout<T extends FieldData = FieldData, U extends GenericPo
             {
                 method: 'POST',
                 body: form,
-                headers: form.getHeaders(),
             }
         );
     }
@@ -288,7 +287,7 @@ export default class Layout<T extends FieldData = FieldData, U extends GenericPo
                 if (request instanceof URLSearchParams) {
                     request.set(`_offset.${portalName}`, range.offset.toString());
                 } else {
-                    request[`offset.${portalName}`] = range.offset.toString();
+                    request[`offset.${portalName}`] = range.offset;
                 }
             }
 
@@ -296,7 +295,7 @@ export default class Layout<T extends FieldData = FieldData, U extends GenericPo
                 if (request instanceof URLSearchParams) {
                     request.set(`_limit.${portalName}`, range.limit.toString());
                 } else {
-                    request[`limit.${portalName}`] = range.limit.toString();
+                    request[`limit.${portalName}`] = range.limit;
                 }
             }
         }
