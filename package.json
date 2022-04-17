@@ -50,7 +50,7 @@
   },
   "dependencies": {
     "form-data": "^4.0.0",
-    "into-stream": "^7.0.0",
+    "into-stream": "^6.0.0",
     "node-fetch": "^2.6.7"
   },
   "peerDependencies": {
