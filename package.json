@@ -7,19 +7,15 @@
   "scripts": {
     "build": "tsc",
     "lint": "eslint .",
-    "prepare": "npm run build && husky install",
-    "prepublishOnly": "npm test && npm run lint",
-    "preversion": "npm run lint",
-    "version": "npm run format && git add -A src",
-    "postversion": "git push && git push --tags",
-    "test": "jest test --coverage"
+    "test": "jest test --coverage",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com:soliantconsulting/fm-data-api-client.git"
   },
   "files": [
-    "lib/**/*"
+    "dist/**/*"
   ],
   "keywords": [
     "FileMaker",
@@ -33,7 +29,7 @@
   "devDependencies": {
     "@commitlint/cli": "^16.2.3",
     "@commitlint/config-conventional": "^16.2.1",
-    "@js-joda/core": "^4.2.1",
+    "@js-joda/core": "^5.2.0",
     "@tsconfig/node14": "^1.0.1",
     "@types/form-data": "^2.5.0",
     "@types/into-stream": "^3.1.1",
@@ -54,11 +50,11 @@
   },
   "dependencies": {
     "form-data": "^4.0.0",
-    "into-stream": "^6.0.0",
+    "into-stream": "^7.0.0",
     "node-fetch": "^2.6.7"
   },
   "peerDependencies": {
-    "@js-joda/core": "^3.0.0 || ^4.0.0"
+    "@js-joda/core": "^3.0.0 || ^4.0.0 || ^5.0.0"
   },
   "lint-staged": {
     "*.ts": "eslint --cache --fix"
