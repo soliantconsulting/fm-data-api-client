@@ -1,5 +1,9 @@
 # FM Data API Client
 
+[![npm version](https://badge.fury.io/js/fm-data-api-client.svg)](https://badge.fury.io/js/fm-data-api-client)
+[![Release](https://github.com/soliantconsulting/fm-data-api-client/actions/workflows/release.yml/badge.svg)](https://github.com/soliantconsulting/fm-data-api-client/actions/workflows/release.yml)
+[![codecov](https://codecov.io/gh/soliantconsulting/fm-data-api-client/branch/main/graph/badge.svg?token=ID1YAAB9CP)](https://codecov.io/gh/soliantconsulting/fm-data-api-client)
+
 NodeJS client for the FileMaker Data API, written in TypeScript. This library supports all FileMaker 17 features.
 
 ## Requirements
