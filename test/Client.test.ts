@@ -90,6 +90,48 @@ describe('Client', () => {
             await client.request('test');
         });
 
+        it('should retry with a new token if server reports invalid data API token', async () => {
+            let firstRequest = true;
+
+            nock('http://example.com')
+                .post('/fmi/data/v1/databases/db/sessions')
+                .twice()
+                .reply(() => {
+                    if (firstRequest) {
+                        firstRequest = false;
+                        return [200, {}, {'X-FM-Data-Access-Token': 'foo'}] as const;
+                    }
+
+                    return [200, {}, {'X-FM-Data-Access-Token': 'bar'}] as const;
+                });
+            nock('http://example.com')
+                .get('/fmi/data/v1/databases/db/test')
+                .matchHeader('authorization', 'Bearer foo')
+                .matchHeader('content-type', 'application/json')
+                .reply(400, {messages: [{code: '952', message: 'Invalid FileMaker DATA API token'}]});
+            nock('http://example.com')
+                .get('/fmi/data/v1/databases/db/test')
+                .matchHeader('authorization', 'Bearer bar')
+                .reply(200, {response: 'test'});
+
+            const response = await client.request('test');
+            expect(response).toBe('test');
+        });
+
+        it('should fail when the token is reported as invalid twice', async () => {
+            nock('http://example.com')
+                .post('/fmi/data/v1/databases/db/sessions')
+                .twice()
+                .reply(200, {}, {'X-FM-Data-Access-Token': 'foo'});
+            nock('http://example.com')
+                .get('/fmi/data/v1/databases/db/test')
+                .twice()
+                .reply(400, {messages: [{code: '952', message: 'Invalid FileMaker DATA API token'}]});
+
+            const request = client.request('test');
+            await expect(request).rejects.toEqual(new FileMakerError('952', 'Invalid FileMaker DATA API token'));
+        });
+
         it('should sign in with basic auth', async () => {
             nock('http://example.com')
                 .post('/fmi/data/v1/databases/db/sessions')

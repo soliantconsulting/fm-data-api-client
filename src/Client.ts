@@ -48,20 +48,26 @@ export default class Client {
         return new Layout<T, U>(layout, this);
     }
 
-    public async request<T>(path : string, request ?: RequestInit) : Promise<T> {
-        request = Client.injectHeaders(
+    public async request<T>(path : string, request ?: RequestInit, retryOnInvalidToken = true) : Promise<T> {
+        const authorizedRequest = Client.injectHeaders(
             new Headers({
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${await this.getToken()}`,
             }),
             request
         );
-        request.agent = this.agent;
+        authorizedRequest.agent = this.agent;
 
-        const response = await fetch(`${this.uri}/fmi/data/v1/databases/${this.database}/${path}`, request);
+        const response = await fetch(`${this.uri}/fmi/data/v1/databases/${this.database}/${path}`, authorizedRequest);
 
         if (!response.ok) {
             const data = await response.json() as FileMakerErrorResponse;
+
+            if (data.messages[0].code === '952' && retryOnInvalidToken) {
+                this.token = null;
+                return this.request(path, request, false);
+            }
+
             throw new FileMakerError(data.messages[0].code, data.messages[0].message);
         }
 
