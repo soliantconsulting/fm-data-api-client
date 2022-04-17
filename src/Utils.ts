@@ -47,6 +47,8 @@ export const parseBoolean = (value : Numerish) : boolean => value !== 0 && value
 
 /**
  * Date utility for working with dates, times and time stamps.
+ *
+ * @deprecated Use <pre>js-joda</pre> or another datetime library directly.
  */
 export class DateUtil {
     private readonly dateFormatter : DateTimeFormatter;
