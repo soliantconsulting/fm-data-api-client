@@ -9,7 +9,7 @@ export type Numerish = string | number;
 export type FieldValue = string | Numerish;
 export type FieldData = Record<string, FieldValue>;
 
-export type GenericPortalData = Record<string, Record<string, FieldData>>;
+export type GenericPortalData = Record<string, FieldData>;
 
 export type RecordResponse<T extends FieldData = FieldData, U extends GenericPortalData = GenericPortalData> = {
     fieldData : T;

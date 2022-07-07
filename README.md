@@ -59,10 +59,10 @@ type MyFieldData = {
 
 type MyPortalData = {
     portalA: {
-        name : string;
+        'portalA::name' : string;
     };
     portalB: {
-        name : string;
+        'portalB::name' : string;
     };
 };
 ```
