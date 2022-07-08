@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/soliantconsulting/fm-data-api-client/compare/v1.2.1...v1.2.2) (2022-07-08)
+
+
+### Bug Fixes
+
+* **Layout:** fix type of GenericPortalData ([4c7fc00](https://github.com/soliantconsulting/fm-data-api-client/commit/4c7fc0086cbfe50c89679c12c3a62e615d5e090c))
+
 ## [1.2.1](https://github.com/soliantconsulting/fm-data-api-client/compare/v1.2.0...v1.2.1) (2022-04-17)
 
 
