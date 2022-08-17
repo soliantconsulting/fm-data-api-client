@@ -2,10 +2,11 @@
   "name": "fm-data-api-client",
   "version": "1.2.2",
   "description": "FileMaker Data API Client",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf dist && rollup -c",
     "lint": "eslint .",
     "test": "jest test --coverage",
     "prepare": "husky install"
@@ -30,6 +31,7 @@
     "@commitlint/cli": "^16.2.3",
     "@commitlint/config-conventional": "^16.2.1",
     "@js-joda/core": "^5.2.0",
+    "@rollup/plugin-typescript": "^8.3.4",
     "@tsconfig/node14": "^1.0.1",
     "@types/form-data": "^2.5.0",
     "@types/into-stream": "^3.1.1",
@@ -44,6 +46,7 @@
     "jest": "^27.5.1",
     "lint-staged": "^12.3.8",
     "nock": "^13.2.4",
+    "rollup": "^2.78.0",
     "sinon": "^13.0.2",
     "ts-jest": "^27.1.4",
     "typescript": "^4.0.3"
