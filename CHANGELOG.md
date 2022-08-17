@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/soliantconsulting/fm-data-api-client/compare/v1.2.2...v1.3.0) (2022-08-17)
+
+
+### Features
+
+* add ESM support ([8483860](https://github.com/soliantconsulting/fm-data-api-client/commit/84838604099db5a2f31f991b88545bb2694999db))
+
 ## [1.2.2](https://github.com/soliantconsulting/fm-data-api-client/compare/v1.2.1...v1.2.2) (2022-07-08)
 
 
