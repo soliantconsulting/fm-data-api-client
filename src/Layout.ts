@@ -103,7 +103,7 @@ export type GetResponse<
 export type Query<T extends FieldData = FieldData> = Partial<{
     [key in keyof T] : T[key] | string;
 }> & {
-    omit ?: boolean | 'true' | 'false';
+    omit ?: boolean;
 };
 
 export type File = {
@@ -237,17 +237,11 @@ export default class Layout<T extends FieldData = FieldData, U extends GenericPo
         ignoreEmptyResult = false
     ) : Promise<GetResponse<T, U>> {
         // convert any boolean "omit" values in the query in the query to "true" or "false" strings
-        const queryArray = Array.isArray(query) ? query : [query];
-        const omitConvertedQuery = queryArray.map(query => {
-            if (typeof query.omit === 'boolean') {
-                query.omit = query.omit ? 'true' : 'false';
-            }
-
-            return query;
-        });
-
         const request : Record<string, unknown> = {
-            query: omitConvertedQuery,
+            query: (Array.isArray(query) ? query : [query]).map(query => ({
+                ...query,
+                omit: query.omit?.toString(),
+            })),
         };
 
         for (const [key, value] of Object.entries(params)) {
