@@ -236,7 +236,6 @@ export default class Layout<T extends FieldData = FieldData, U extends GenericPo
         params : ListParams<T, U> = {},
         ignoreEmptyResult = false
     ) : Promise<GetResponse<T, U>> {
-        // convert any boolean "omit" values in the query in the query to "true" or "false" strings
         const request : Record<string, unknown> = {
             query: (Array.isArray(query) ? query : [query]).map(query => ({
                 ...query,
