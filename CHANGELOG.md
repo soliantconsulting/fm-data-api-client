@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/soliantconsulting/fm-data-api-client/compare/v1.3.0...v1.3.1) (2024-05-03)
+
+
+### Bug Fixes
+
+* **Layout:** convert boolean true/false for omits to string ([#12](https://github.com/soliantconsulting/fm-data-api-client/issues/12)) ([89c9f3f](https://github.com/soliantconsulting/fm-data-api-client/commit/89c9f3ff5969178e729b98284d034fe75bda0892))
+
 # [1.3.0](https://github.com/soliantconsulting/fm-data-api-client/compare/v1.2.2...v1.3.0) (2022-08-17)
 
 
