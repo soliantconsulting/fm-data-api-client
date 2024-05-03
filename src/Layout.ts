@@ -237,7 +237,10 @@ export default class Layout<T extends FieldData = FieldData, U extends GenericPo
         ignoreEmptyResult = false
     ) : Promise<GetResponse<T, U>> {
         const request : Record<string, unknown> = {
-            query: Array.isArray(query) ? query : [query],
+            query: (Array.isArray(query) ? query : [query]).map(query => ({
+                ...query,
+                omit: query.omit?.toString(),
+            })),
         };
 
         for (const [key, value] of Object.entries(params)) {
