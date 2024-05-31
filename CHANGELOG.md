@@ -1,3 +1,11 @@
+# [1.4.0](https://github.com/soliantconsulting/fm-data-api-client/compare/v1.3.1...v1.4.0) (2024-05-31)
+
+
+### Features
+
+* **Client:** add client.requestContainer to download secure containers ([d67d967](https://github.com/soliantconsulting/fm-data-api-client/commit/d67d9677eaae46d88b1146689782fc38b3cff08c))
+* **Layout:** add executeScript to layout ([5c729a4](https://github.com/soliantconsulting/fm-data-api-client/commit/5c729a4ac8e17b4451e5bfdb02a4952f02f8b0bd))
+
 ## [1.3.1](https://github.com/soliantconsulting/fm-data-api-client/compare/v1.3.0...v1.3.1) (2024-05-03)
 
 
