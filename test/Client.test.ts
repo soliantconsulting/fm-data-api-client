@@ -173,6 +173,40 @@ describe('Client', () => {
         });
     });
 
+    describe('requestContainer', () => {
+        it('should retrieve a token on first request', async () => {
+            const containerPath = '/Streaming_SSL/MainDB/asdf.xml?RCType=EmbeddedRCFileProcessor';
+            const cookie = 'X-FMS-Session-Key=asdf123; HttpOnly';
+            nock('http://example.com')
+                .post('/fmi/data/v1/databases/db/sessions')
+                .matchHeader('content-type', 'application/json')
+                .matchHeader('authorization', 'Basic dXNlcjpwYXNz')
+                .reply(200, {}, {'X-FM-Data-Access-Token': 'foo'});
+            nock('http://example.com')
+                .get(containerPath)
+                .matchHeader('authorization', 'Bearer foo')
+                .reply(302, {}, {
+                    'set-cookie': cookie,
+                });
+            nock('http://example.com')
+                .get(containerPath)
+                .matchHeader('cookie', cookie)
+                .reply(200, 'test', {
+                    'set-cookie': cookie,
+                    'content-type': 'application/text',
+                });
+
+            const response = await client.requestContainer(`http://example.com${containerPath}`);
+            expect(response.buffer.toString()).toBe('test');
+            expect(response.contentType).toBe('application/text');
+        });
+    });
+
+    it('should throw error on requests with missmatched url', async () => {
+        await expect(client.requestContainer('http://example.io'))
+            .rejects.toEqual(new Error('Container url must start with the same url ase the FM host'));
+    });
+
     describe('clearToken', () => {
         it('should do nothing without a token', async () => {
             const scope = nock('http://example.com')

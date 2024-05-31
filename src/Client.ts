@@ -25,6 +25,11 @@ type FileMakerResponse<T> = {
     response : T;
 };
 
+type ContainerDownload = {
+    contentType ?: string | null;
+    buffer : Buffer;
+};
+
 export default class Client {
     private readonly agent : http.Agent;
     private token : string | null = null;
@@ -73,6 +78,47 @@ export default class Client {
 
         this.lastCall = Date.now();
         return (await response.json() as FileMakerResponse<T>).response;
+    }
+
+    public async requestContainer(
+        containerUrl : string,
+        request ?: RequestInit
+    ) : Promise<ContainerDownload> {
+        if (!containerUrl.startsWith(this.uri)) {
+            throw new Error('Container url must start with the same url ase the FM host');
+        }
+
+        const token = await this.getToken();
+        const authorizedRequest = Client.injectHeaders(
+            new Headers({
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            }),
+            request
+        );
+        authorizedRequest.agent = this.agent;
+        authorizedRequest.redirect = 'manual';
+
+        const response = await fetch(containerUrl, authorizedRequest);
+
+        if (response.status === 302 && response.headers.has('set-cookie')) {
+            const redirectRequest = Client.injectHeaders(
+                new Headers({
+                    'cookie': response.headers.get('set-cookie') ?? '',
+                }),
+                request
+            );
+            return this.requestContainer(containerUrl, redirectRequest);
+        }
+
+        if (!response.ok) {
+            throw new Error(`Failed to download container ${response.status}`);
+        }
+
+        return {
+            contentType: response.headers.get('Content-Type'),
+            buffer: await response.buffer(),
+        };
     }
 
     public async clearToken() : Promise<void> {

@@ -28,33 +28,36 @@
   "author": "Soliant Consulting",
   "license": "MIT",
   "devDependencies": {
-    "@commitlint/cli": "^17.0.3",
-    "@commitlint/config-conventional": "^17.0.3",
+    "@commitlint/cli": "^19.0.0",
+    "@commitlint/config-conventional": "^19.0.0",
     "@js-joda/core": "^5.2.0",
     "@rollup/plugin-typescript": "^8.3.4",
-    "@tsconfig/node14": "^1.0.1",
+    "@tsconfig/node18": "^18.0.0",
     "@types/form-data": "^2.5.0",
     "@types/into-stream": "^3.1.1",
-    "@types/jest": "^28.1.7",
-    "@types/node": "^14.11.1",
+    "@types/jest": "^29.0.0",
+    "@types/node": "^18.0.0",
     "@types/node-fetch": "^2.5.7",
     "@types/sinon": "^10.0.11",
     "eslint": "^8.13.0",
-    "eslint-config-dasprid": "^0.1.12",
+    "eslint-config-dasprid": "^0.3.2",
     "get-stream": "^6.0.1",
     "husky": "^8.0.1",
-    "jest": "^28.1.3",
+    "jest": "^29.0.0",
     "lint-staged": "^13.0.3",
     "nock": "^13.2.4",
     "rollup": "^2.78.0",
     "sinon": "^14.0.0",
-    "ts-jest": "^28.0.8",
-    "typescript": "^4.0.3"
+    "ts-jest": "^29.0.0",
+    "typescript": "~5.2.0"
   },
   "dependencies": {
     "form-data": "^4.0.0",
     "into-stream": "^6.0.0",
     "node-fetch": "^2.6.7"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "peerDependencies": {
     "@js-joda/core": "^3.0.0 || ^4.0.0 || ^5.0.0"
