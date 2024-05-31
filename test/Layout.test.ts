@@ -379,4 +379,26 @@ describe('Layout', () => {
             expect(response).toEqual({data: []});
         });
     });
+
+    describe('executeScript', () => {
+        it('should send a execute script call', async () => {
+            const expectedResponse = {scriptResult: 'bar', scriptError: '0'};
+
+            clientMock.request.withArgs('layouts/foo/script/testscript?')
+                .returns(Promise.resolve(expectedResponse));
+
+            const response = await layout.executeScript('testscript');
+            expect(response).toBe(expectedResponse);
+        });
+
+        it('should send a execute script call with param', async () => {
+            const expectedResponse = {scriptError: '0'};
+
+            clientMock.request.withArgs('layouts/foo/script/test%20%7C%20script?script.param=%3Ftest%2B%3Dparam')
+                .returns(Promise.resolve(expectedResponse));
+
+            const response = await layout.executeScript('test | script', '?test+=param');
+            expect(response).toBe(expectedResponse);
+        });
+    });
 });
