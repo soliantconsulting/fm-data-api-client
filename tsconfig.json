@@ -1,9 +1,8 @@
 {
-    "extends": "@tsconfig/node14/tsconfig.json",
+    "extends": "@tsconfig/node18/tsconfig.json",
     "compilerOptions": {
         "noImplicitAny": true,
         "strictNullChecks": true,
-        "importsNotUsedAsValues": "error",
         "sourceMap": true,
         "strict": true,
         "declaration": true,

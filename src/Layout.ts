@@ -83,7 +83,7 @@ export type GetParams<U extends GenericPortalData = GenericPortalData> = ScriptP
 
 export type Sort<T extends FieldData = FieldData> = {
     fieldName : keyof T;
-    sortOrder : 'ascend' | 'descend' | string;
+    sortOrder : 'ascend' | 'descend';
 };
 
 export type ListParams<
@@ -110,6 +110,8 @@ export type File = {
     name : string;
     buffer : Buffer;
 };
+
+export type ExecuteScriptResponse = Pick<ScriptResponse, 'scriptResult' | 'scriptError'>;
 
 export default class Layout<T extends FieldData = FieldData, U extends GenericPortalData = GenericPortalData> {
     public constructor(private readonly layout : string, private readonly client : Client) {
@@ -275,6 +277,24 @@ export default class Layout<T extends FieldData = FieldData, U extends GenericPo
 
             throw e;
         }
+    }
+
+    /**
+     * The script parameter will be in the query parameter so do not send sensitive information in it.
+     */
+    public async executeScript(
+        scriptName : string,
+        scriptParam ?: string,
+    ) : Promise<ExecuteScriptResponse> {
+        const searchParams = new URLSearchParams();
+
+        if (scriptParam) {
+            searchParams.set('script.param', scriptParam);
+        }
+
+        return await this.client.request<ExecuteScriptResponse>(
+            `layouts/${this.layout}/script/${encodeURI(scriptName)}?${searchParams.toString()}`
+        );
     }
 
     private addPortalRangesToRequest(
