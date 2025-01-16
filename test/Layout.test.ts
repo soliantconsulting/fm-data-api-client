@@ -250,7 +250,15 @@ describe('Layout', () => {
 
     describe('find', () => {
         it('should send a find call', async () => {
-            const expectedResponse = {data: [{recordId: '1', modId: '1'}], 'scriptResult': 'bar'};
+            const expectedResponse = {
+                data: [{recordId: '1', modId: '1'}],
+                'scriptResult': 'bar',
+                dataInfo: {
+                    foundCount: 1,
+                    returnedCount: 1,
+                    totalRecordCount: 1,
+                },
+            };
 
             clientMock.request.withArgs('layouts/foo/_find', {
                 method: 'POST',
@@ -265,7 +273,14 @@ describe('Layout', () => {
         });
 
         it('should send a find call with array query', async () => {
-            const expectedResponse = {data: [{recordId: '1', modId: '1'}]};
+            const expectedResponse = {
+                data: [{recordId: '1', modId: '1'}],
+                dataInfo: {
+                    foundCount: 1,
+                    returnedCount: 1,
+                    totalRecordCount: 1,
+                },
+            };
 
             clientMock.request.withArgs('layouts/foo/_find', {
                 method: 'POST',
@@ -280,7 +295,14 @@ describe('Layout', () => {
         });
 
         it('should send a find call with offset and limit', async () => {
-            const expectedResponse = {data: [{recordId: '1', modId: '1'}]};
+            const expectedResponse = {
+                data: [{recordId: '1', modId: '1'}],
+                dataInfo: {
+                    foundCount: 1,
+                    returnedCount: 1,
+                    totalRecordCount: 1,
+                },
+            };
 
             clientMock.request.withArgs('layouts/foo/_find', {
                 method: 'POST',
@@ -296,7 +318,14 @@ describe('Layout', () => {
         });
 
         it('should send a find call with single sort', async () => {
-            const expectedResponse = {data: [{recordId: '1', modId: '1'}]};
+            const expectedResponse = {
+                data: [{recordId: '1', modId: '1'}],
+                dataInfo: {
+                    foundCount: 1,
+                    returnedCount: 1,
+                    totalRecordCount: 1,
+                },
+            };
 
             clientMock.request.withArgs('layouts/foo/_find', {
                 method: 'POST',
@@ -311,7 +340,14 @@ describe('Layout', () => {
         });
 
         it('should send a find call with array sort', async () => {
-            const expectedResponse = {data: [{recordId: '1', modId: '1'}]};
+            const expectedResponse = {
+                data: [{recordId: '1', modId: '1'}],
+                dataInfo: {
+                    foundCount: 1,
+                    returnedCount: 1,
+                    totalRecordCount: 1,
+                },
+            };
 
             clientMock.request.withArgs('layouts/foo/_find', {
                 method: 'POST',
@@ -326,7 +362,14 @@ describe('Layout', () => {
         });
 
         it('should send a find call with portal ranges', async () => {
-            const expectedResponse = {data: [{recordId: '1', modId: '1'}]};
+            const expectedResponse = {
+                data: [{recordId: '1', modId: '1'}],
+                dataInfo: {
+                    foundCount: 1,
+                    returnedCount: 1,
+                    totalRecordCount: 1,
+                },
+            };
 
             clientMock.request.withArgs('layouts/foo/_find', {
                 method: 'POST',
@@ -342,7 +385,14 @@ describe('Layout', () => {
         });
 
         it('should send a find call with empty portal ranges', async () => {
-            const expectedResponse = {data: [{recordId: '1', modId: '1'}]};
+            const expectedResponse = {
+                data: [{recordId: '1', modId: '1'}],
+                dataInfo: {
+                    foundCount: 1,
+                    returnedCount: 1,
+                    totalRecordCount: 1,
+                },
+            };
 
             clientMock.request.withArgs('layouts/foo/_find', {
                 method: 'POST',
@@ -376,7 +426,14 @@ describe('Layout', () => {
             }).rejects(new FileMakerError('401', 'Nothing found'));
 
             const response = await layout.find({foo: '=bar'}, {}, true);
-            expect(response).toEqual({data: []});
+            expect(response).toEqual({
+                data: [],
+                dataInfo: {
+                    foundCount: 0,
+                    returnedCount: 0,
+                    totalRecordCount: 0,
+                },
+            });
         });
     });
 
