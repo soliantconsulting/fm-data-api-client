@@ -100,6 +100,17 @@ export type GetResponse<
     data : Array<RecordResponse<T, U>>;
 };
 
+export type FindResponse<
+    T extends FieldData = FieldData,
+    U extends GenericPortalData = GenericPortalData,
+> = GetResponse<T, U> & {
+    dataInfo : {
+        foundCount : number;
+        returnedCount : number;
+        totalRecordCount : number;
+    };
+};
+
 export type Query<T extends FieldData = FieldData> = Partial<{
     [key in keyof T] : T[key] | string;
 }> & {
@@ -237,7 +248,7 @@ export default class Layout<T extends FieldData = FieldData, U extends GenericPo
         query : Query<T> | Array<Query<T>>,
         params : ListParams<T, U> = {},
         ignoreEmptyResult = false
-    ) : Promise<GetResponse<T, U>> {
+    ) : Promise<FindResponse<T, U>> {
         const request : Record<string, unknown> = {
             query: (Array.isArray(query) ? query : [query]).map(query => ({
                 ...query,
@@ -266,13 +277,20 @@ export default class Layout<T extends FieldData = FieldData, U extends GenericPo
         }
 
         try {
-            return await this.client.request<GetResponse<T, U>>(`layouts/${this.layout}/_find`, {
+            return await this.client.request<FindResponse<T, U>>(`layouts/${this.layout}/_find`, {
                 method: 'POST',
                 body: JSON.stringify(request),
             });
         } catch (e) {
             if (ignoreEmptyResult && e instanceof FileMakerError && e.code === '401') {
-                return {data: []};
+                return {
+                    data: [],
+                    dataInfo: {
+                        foundCount: 0,
+                        returnedCount: 0,
+                        totalRecordCount: 0,
+                    },
+                };
             }
 
             throw e;
