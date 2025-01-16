@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/soliantconsulting/fm-data-api-client/compare/v1.4.0...v1.5.0) (2025-01-16)
+
+
+### Features
+
+* include dataInfo in find responses ([27817b9](https://github.com/soliantconsulting/fm-data-api-client/commit/27817b9d41c778386ef3603d64252a608919cbe5))
+
 # [1.4.0](https://github.com/soliantconsulting/fm-data-api-client/compare/v1.3.1...v1.4.0) (2024-05-31)
 
 
