@@ -1,7 +1,3 @@
-import http from 'http';
-import https from 'https';
-import type {RequestInit} from 'node-fetch';
-import fetch, {Headers} from 'node-fetch';
 import type {FieldData, GenericPortalData} from './Layout';
 import Layout from './Layout';
 
@@ -27,11 +23,10 @@ type FileMakerResponse<T> = {
 
 type ContainerDownload = {
     contentType ?: string | null;
-    buffer : Buffer;
+    buffer : Blob;
 };
 
 export default class Client {
-    private readonly agent : http.Agent;
     private token : string | null = null;
     private lastCall = 0;
 
@@ -41,9 +36,6 @@ export default class Client {
         private readonly username : string,
         private readonly password : string
     ) {
-        this.agent = new (uri.startsWith('https:') ? https : http).Agent({
-            keepAlive: true,
-        });
     }
 
     public layout<
@@ -61,7 +53,6 @@ export default class Client {
             }),
             request
         );
-        authorizedRequest.agent = this.agent;
 
         const response = await fetch(`${this.uri}/fmi/data/v1/databases/${this.database}/${path}`, authorizedRequest);
 
@@ -96,7 +87,6 @@ export default class Client {
             }),
             request
         );
-        authorizedRequest.agent = this.agent;
         authorizedRequest.redirect = 'manual';
 
         const response = await fetch(containerUrl, authorizedRequest);
@@ -117,7 +107,7 @@ export default class Client {
 
         return {
             contentType: response.headers.get('Content-Type'),
-            buffer: await response.buffer(),
+            buffer: await response.blob(),
         };
     }
 
@@ -131,7 +121,6 @@ export default class Client {
             headers: {
                 'Content-Type': 'application/json',
             },
-            agent: this.agent,
         });
 
         this.token = null;
@@ -152,7 +141,6 @@ export default class Client {
             method: 'POST',
             body: '{}',
             headers,
-            agent: this.agent,
         });
 
         if (!response.ok) {
