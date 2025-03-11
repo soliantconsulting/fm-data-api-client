@@ -1,6 +1,4 @@
-import http from 'http';
-import https from 'https';
-import nock, {cleanAll} from 'nock';
+import fetchMock from '@fetch-mock/jest';
 import {Client} from '../src';
 import {FileMakerError} from '../src/Client';
 
@@ -8,23 +6,12 @@ describe('Client', () => {
     let client : Client;
 
     beforeEach(() => {
-        client = new Client('http://example.com', 'db', 'user', 'pass');
+        fetchMock.mockGlobal();
+        client = new Client('https://localhost', 'db', 'user', 'pass');
     });
 
     afterEach(() => {
-        cleanAll();
-    });
-
-    describe('constructor', () => {
-        it('should use http agent for http URIs', () => {
-            const client = new Client('http://example.com', 'db', 'user', 'pass');
-            expect(client['agent']).toBeInstanceOf(http.Agent);
-        });
-
-        it('should use https agent for https URIs', () => {
-            const client = new Client('https://example.com', 'db', 'user', 'pass');
-            expect(client['agent']).toBeInstanceOf(https.Agent);
-        });
+        fetchMock.mockRestore();
     });
 
     describe('layout', () => {
@@ -36,28 +23,39 @@ describe('Client', () => {
 
     describe('request', () => {
         it('should retrieve a token on first request', async () => {
-            nock('http://example.com')
-                .post('/fmi/data/v1/databases/db/sessions')
-                .reply(200, {}, {'X-FM-Data-Access-Token': 'foo'});
-            nock('http://example.com')
-                .get('/fmi/data/v1/databases/db/test')
-                .matchHeader('authorization', 'Bearer foo')
-                .matchHeader('content-type', 'application/json')
-                .reply(200, {response: 'test'});
+            fetchMock.post('https://localhost/fmi/data/v1/databases/db/sessions', {
+                status: 200,
+                headers: {'X-FM-Data-Access-Token': 'foo'},
+                body: {},
+            });
 
+            fetchMock.get('https://localhost/fmi/data/v1/databases/db/test', {
+                status: 200,
+                headers: {
+                    'authorization': 'Bearer foo',
+                    'content-type': 'application/json',
+                },
+                body: {response: 'test'},
+            });
             const response = await client.request('test');
             expect(response).toBe('test');
         });
 
         it('should reuse a token for 14 minutes', async () => {
-            nock('http://example.com')
-                .post('/fmi/data/v1/databases/db/sessions')
-                .reply(200, {}, {'X-FM-Data-Access-Token': 'foo'});
-            nock('http://example.com')
-                .get('/fmi/data/v1/databases/db/test')
-                .matchHeader('authorization', 'Bearer foo')
-                .times(2)
-                .reply(200, {response: 'test'});
+            fetchMock.post('https://localhost/fmi/data/v1/databases/db/sessions', {
+                status: 200,
+                headers: {'X-FM-Data-Access-Token': 'foo'},
+                body: {},
+            });
+
+            fetchMock.get('https://localhost/fmi/data/v1/databases/db/test', {
+                status: 200,
+                headers: {
+                    'authorization': 'Bearer foo',
+                    'content-type': 'application/json',
+                },
+                body: {response: 'test'},
+            }, {repeat: 2});
 
             jest.spyOn(Date, 'now').mockImplementation(() => 0);
             await client.request('test');
@@ -67,24 +65,38 @@ describe('Client', () => {
         });
 
         it('should request a new token after 14 minutes', async () => {
-            nock('http://example.com')
-                .post('/fmi/data/v1/databases/db/sessions')
-                .reply(200, {}, {'X-FM-Data-Access-Token': 'foo'});
-            nock('http://example.com')
-                .get('/fmi/data/v1/databases/db/test')
-                .matchHeader('authorization', 'Bearer foo')
-                .reply(200, {response: 'test'});
+            fetchMock.post('https://localhost/fmi/data/v1/databases/db/sessions', {
+                status: 200,
+                headers: {'X-FM-Data-Access-Token': 'foo'},
+                body: {},
+            });
+
+            fetchMock.get('https://localhost/fmi/data/v1/databases/db/test', {
+                status: 200,
+                headers: {
+                    'authorization': 'Bearer foo',
+                    'content-type': 'application/json',
+                },
+                body: {response: 'test'},
+            });
 
             jest.spyOn(Date, 'now').mockImplementation(() => 0);
             await client.request('test');
 
-            nock('http://example.com')
-                .post('/fmi/data/v1/databases/db/sessions')
-                .reply(200, {}, {'X-FM-Data-Access-Token': 'bar'});
-            nock('http://example.com')
-                .get('/fmi/data/v1/databases/db/test')
-                .matchHeader('authorization', 'Bearer bar')
-                .reply(200, {response: 'test'});
+            fetchMock.post('https://localhost/fmi/data/v1/databases/db/sessions', {
+                status: 200,
+                headers: {'X-FM-Data-Access-Token': 'bar'},
+                body: {},
+            });
+
+            fetchMock.get('https://localhost/fmi/data/v1/databases/db/test', {
+                status: 200,
+                headers: {
+                    'authorization': 'Bearer bar',
+                    'content-type': 'application/json',
+                },
+                body: {response: 'test'},
+            });
 
             jest.spyOn(Date, 'now').mockImplementation(() => 14 * 60 * 1000);
             await client.request('test');
@@ -93,81 +105,109 @@ describe('Client', () => {
         it('should retry with a new token if server reports invalid data API token', async () => {
             let firstRequest = true;
 
-            nock('http://example.com')
-                .post('/fmi/data/v1/databases/db/sessions')
-                .twice()
-                .reply(() => {
-                    if (firstRequest) {
-                        firstRequest = false;
-                        return [200, {}, {'X-FM-Data-Access-Token': 'foo'}] as const;
-                    }
+            fetchMock.post('https://localhost/fmi/data/v1/databases/db/sessions', () => {
+                if (firstRequest) {
+                    firstRequest = false;
+                    return {
+                        status: 200,
+                        headers: {'X-FM-Data-Access-Token': 'foo'},
+                        body: {},
+                    };
+                }
 
-                    return [200, {}, {'X-FM-Data-Access-Token': 'bar'}] as const;
-                });
-            nock('http://example.com')
-                .get('/fmi/data/v1/databases/db/test')
-                .matchHeader('authorization', 'Bearer foo')
-                .matchHeader('content-type', 'application/json')
-                .reply(400, {messages: [{code: '952', message: 'Invalid FileMaker DATA API token'}]});
-            nock('http://example.com')
-                .get('/fmi/data/v1/databases/db/test')
-                .matchHeader('authorization', 'Bearer bar')
-                .reply(200, {response: 'test'});
+                return {
+                    status: 200,
+                    headers: {'X-FM-Data-Access-Token': 'bar'},
+                    body: {},
+                };
+            }, {repeat: 2});
+
+            fetchMock.getOnce('https://localhost/fmi/data/v1/databases/db/test', {
+                status: 400,
+                headers: {
+                    'authorization': 'Bearer foo',
+                    'content-type': 'application/json',
+                },
+                body: {messages: [{code: '952', message: 'Invalid FileMaker DATA API token'}]},
+            });
+
+            fetchMock.getOnce('https://localhost/fmi/data/v1/databases/db/test', {
+                status: 200,
+                headers: {
+                    'authorization': 'Bearer bar',
+                    'content-type': 'application/json',
+                },
+                body: {response: 'test'},
+            });
 
             const response = await client.request('test');
             expect(response).toBe('test');
         });
 
         it('should fail when the token is reported as invalid twice', async () => {
-            nock('http://example.com')
-                .post('/fmi/data/v1/databases/db/sessions')
-                .twice()
-                .reply(200, {}, {'X-FM-Data-Access-Token': 'foo'});
-            nock('http://example.com')
-                .get('/fmi/data/v1/databases/db/test')
-                .twice()
-                .reply(400, {messages: [{code: '952', message: 'Invalid FileMaker DATA API token'}]});
+            fetchMock.post('https://localhost/fmi/data/v1/databases/db/sessions', {
+                status: 200,
+                headers: {'X-FM-Data-Access-Token': 'foo'},
+                body: {},
+            }, {repeat: 2});
+
+            fetchMock.get('https://localhost/fmi/data/v1/databases/db/test', {
+                status: 400,
+                body: {messages: [{code: '952', message: 'Invalid FileMaker DATA API token'}]},
+            }, {repeat: 2});
 
             const request = client.request('test');
             await expect(request).rejects.toEqual(new FileMakerError('952', 'Invalid FileMaker DATA API token'));
         });
 
         it('should sign in with basic auth', async () => {
-            nock('http://example.com')
-                .post('/fmi/data/v1/databases/db/sessions')
-                .matchHeader('content-type', 'application/json')
-                .matchHeader('authorization', 'Basic dXNlcjpwYXNz')
-                .reply(200, {}, {'X-FM-Data-Access-Token': 'foo'});
-            nock('http://example.com')
-                .get('/fmi/data/v1/databases/db/test')
-                .reply(200, {response: 'test'});
+            fetchMock.post('https://localhost/fmi/data/v1/databases/db/sessions', {
+                status: 200,
+                headers: {'X-FM-Data-Access-Token': 'foo'},
+                body: {},
+            }, {
+                headers: {
+                    'content-type': 'application/json',
+                    'authorization': 'Basic dXNlcjpwYXNz',
+                },
+            });
+
+            fetchMock.get('https://localhost/fmi/data/v1/databases/db/test', {
+                status: 200,
+                body: {response: 'test'},
+            });
 
             await client.request('test');
         });
 
         it('should fail when no token can be retrieved', async () => {
-            nock('http://example.com')
-                .post('/fmi/data/v1/databases/db/sessions')
-                .reply(200, {});
-
+            fetchMock.post('https://localhost/fmi/data/v1/databases/db/sessions', {
+                status: 200,
+                body: {},
+            });
             await expect(client.request('test')).rejects.toEqual(new Error('Could not get token'));
         });
 
         it('should throw error on token error response', async () => {
-            nock('http://example.com')
-                .post('/fmi/data/v1/databases/db/sessions')
-                .reply(400, {messages: [{code: '0', message: 'error'}]});
+            fetchMock.post('https://localhost/fmi/data/v1/databases/db/sessions', {
+                status: 400,
+                body: {messages: [{code: '0', message: 'error'}]},
+            });
 
             await expect(client.request('test')).rejects.toEqual(new FileMakerError('0', 'error'));
         });
 
         it('should throw error on request error response', async () => {
-            nock('http://example.com')
-                .post('/fmi/data/v1/databases/db/sessions')
-                .reply(200, {}, {'X-FM-Data-Access-Token': 'foo'});
-            nock('http://example.com')
-                .get('/fmi/data/v1/databases/db/test')
-                .reply(400, {messages: [{code: '0', message: 'error'}]});
+            fetchMock.post('https://localhost/fmi/data/v1/databases/db/sessions', {
+                status: 200,
+                headers: {'X-FM-Data-Access-Token': 'foo'},
+                body: {},
+            });
+
+            fetchMock.get('https://localhost/fmi/data/v1/databases/db/test', {
+                status: 400,
+                body: {messages: [{code: '0', message: 'error'}]},
+            });
 
             await expect(client.request('test')).rejects.toEqual(new FileMakerError('0', 'error'));
         });
@@ -177,74 +217,106 @@ describe('Client', () => {
         it('should retrieve a token on first request', async () => {
             const containerPath = '/Streaming_SSL/MainDB/asdf.xml?RCType=EmbeddedRCFileProcessor';
             const cookie = 'X-FMS-Session-Key=asdf123; HttpOnly';
-            nock('http://example.com')
-                .post('/fmi/data/v1/databases/db/sessions')
-                .matchHeader('content-type', 'application/json')
-                .matchHeader('authorization', 'Basic dXNlcjpwYXNz')
-                .reply(200, {}, {'X-FM-Data-Access-Token': 'foo'});
-            nock('http://example.com')
-                .get(containerPath)
-                .matchHeader('authorization', 'Bearer foo')
-                .reply(302, {}, {
-                    'set-cookie': cookie,
-                });
-            nock('http://example.com')
-                .get(containerPath)
-                .matchHeader('cookie', cookie)
-                .reply(200, 'test', {
-                    'set-cookie': cookie,
-                    'content-type': 'application/text',
-                });
+            fetchMock.post('https://localhost/fmi/data/v1/databases/db/sessions', {
+                status: 200,
+                headers: {'X-FM-Data-Access-Token': 'foo'},
+                body: {},
+            }, {
+                headers: {
+                    'content-type': 'application/json',
+                    'authorization': 'Basic dXNlcjpwYXNz',
+                },
+            });
 
-            const response = await client.requestContainer(`http://example.com${containerPath}`);
-            expect(response.buffer.toString()).toBe('test');
+            let firstRequest = true;
+            fetchMock.get(`https://localhost${containerPath}`, () => {
+                if (firstRequest) {
+                    firstRequest = false;
+                    return {
+                        status: 302,
+                        headers: {
+                            'set-cookie': cookie,
+                        },
+                        body: {},
+                    };
+                }
+
+                return {
+                    headers: {
+                        'content-type': 'application/text',
+                    },
+                    body: 'test',
+                };
+            });
+
+            const response = await client.requestContainer(`https://localhost${containerPath}`);
+            expect(await response.buffer.text()).toBe('test');
             expect(response.contentType).toBe('application/text');
         });
     });
 
     it('should throw error on requests with missmatched url', async () => {
-        await expect(client.requestContainer('http://example.io'))
+        await expect(client.requestContainer('https://example.io'))
             .rejects.toEqual(new Error('Container url must start with the same url ase the FM host'));
     });
 
     describe('clearToken', () => {
         it('should do nothing without a token', async () => {
-            const scope = nock('http://example.com')
-                .delete('/fmi/data/v1/databases/db/sessions/null')
-                .reply(200, {});
+            fetchMock.delete('https://localhost/fmi/data/v1/databases/db/sessions/null', {
+                status: 200,
+                body: '{}',
+            });
 
             await client.clearToken();
-            expect(scope.isDone()).toBe(false);
+            expect(fetchMock).toHaveFetchedTimes(0, new URL('https://localhost/fmi/data/v1/databases/db/sessions/null'));
         });
 
         it('should clear the token', async () => {
-            nock('http://example.com')
-                .post('/fmi/data/v1/databases/db/sessions')
-                .matchHeader('content-type', 'application/json')
-                .matchHeader('authorization', 'Basic dXNlcjpwYXNz')
-                .reply(200, {}, {'X-FM-Data-Access-Token': 'foo'});
-            nock('http://example.com')
-                .get('/fmi/data/v1/databases/db/test')
-                .reply(200, {});
+            fetchMock.post('https://localhost/fmi/data/v1/databases/db/sessions', {
+                status: 200,
+                headers: {'X-FM-Data-Access-Token': 'foo'},
+                body: {},
+            }, {
+                headers: {
+                    'content-type': 'application/json',
+                    'authorization': 'Basic dXNlcjpwYXNz',
+                },
+            });
+
+            fetchMock.get('https://localhost/fmi/data/v1/databases/db/test', {
+                status: 200,
+                body: {},
+            });
 
             await client.request('test');
 
-            const scope = nock('http://example.com')
-                .delete('/fmi/data/v1/databases/db/sessions/foo')
-                .reply(200, {});
+            fetchMock.delete('https://localhost/fmi/data/v1/databases/db/sessions/foo', {
+                status: 200,
+                body: {},
+            });
 
             await client.clearToken();
-            expect(scope.isDone()).toBe(true);
+            expect(fetchMock).toHaveDeletedTimes(1, new URL('https://localhost/fmi/data/v1/databases/db/sessions/foo'));
 
-            nock('http://example.com')
-                .post('/fmi/data/v1/databases/db/sessions')
-                .matchHeader('content-type', 'application/json')
-                .matchHeader('authorization', 'Basic dXNlcjpwYXNz')
-                .reply(200, {}, {'X-FM-Data-Access-Token': 'bar'});
-            nock('http://example.com')
-                .get('/fmi/data/v1/databases/db/test')
-                .matchHeader('authorization', 'Bearer bar')
-                .reply(200, {});
+            fetchMock.post('https://localhost/fmi/data/v1/databases/db/sessions', {
+                status: 200,
+                headers: {'X-FM-Data-Access-Token': 'bar'},
+                body: {},
+            }, {
+                headers: {
+                    'content-type': 'application/json',
+                    'authorization': 'Basic dXNlcjpwYXNz',
+                },
+            });
+
+            fetchMock.get('https://localhost/fmi/data/v1/databases/db/test', {
+                status: 200,
+                body: {},
+            }, {
+                headers: {
+                    'authorization': 'Bearer bar',
+                },
+            });
 
             await client.request('test');
         });

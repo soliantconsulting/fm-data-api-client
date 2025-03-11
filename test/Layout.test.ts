@@ -1,7 +1,5 @@
+import {File} from 'node:buffer';
 import * as path from 'path';
-import FormData from 'form-data';
-import getStream from 'get-stream';
-import type {RequestInit} from 'node-fetch';
 import type {SinonStubbedInstance} from 'sinon';
 import {createStubInstance, match, stub} from 'sinon';
 import {Client, Layout} from '../src';
@@ -123,10 +121,12 @@ describe('Layout', () => {
 
             expect(request.body).toBeInstanceOf(FormData);
             const formData = request.body as FormData;
-            const body = await getStream(formData);
 
-            expect(body).toContain('name="upload"; filename="test-file"');
-            expect(body).toContain('foo-from-file');
+            const upload = formData.get('upload');
+            expect(upload).toBeInstanceOf(File);
+            const uploadFile = upload as unknown as File;
+            const text = await uploadFile.text();
+            expect(text).toContain('foo-from-file\n');
         });
 
         it('should send an upload call from a buffer', async () => {
@@ -145,10 +145,12 @@ describe('Layout', () => {
 
             expect(request.body).toBeInstanceOf(FormData);
             const formData = request.body as FormData;
-            const body = await getStream(formData);
 
-            expect(body).toContain('name="upload"; filename="test-buffer"');
-            expect(body).toContain('foo-from-buffer');
+            const upload = formData.get('upload');
+            expect(upload).toBeInstanceOf(File);
+            const uploadFile = upload as unknown as File;
+            const text = await uploadFile.text();
+            expect(text).toContain('foo-from-buffer');
         });
     });
 

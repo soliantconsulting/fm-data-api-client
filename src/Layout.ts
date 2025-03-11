@@ -1,7 +1,5 @@
-import fs from 'fs';
-import {URLSearchParams} from 'url';
-import FormData from 'form-data';
-import intoStream from 'into-stream';
+import {readFile} from 'node:fs/promises';
+import path from 'node:path';
 import type Client from './Client';
 import {FileMakerError} from './Client';
 
@@ -175,20 +173,25 @@ export default class Layout<T extends FieldData = FieldData, U extends GenericPo
         file : File | string,
         recordId : number,
         fieldName : string,
-        fieldRepetition = 1
+        fieldRepetition = 1,
     ) : Promise<void> {
         const form = new FormData();
-        let stream;
-        let options;
 
         if (typeof file === 'string') {
-            stream = fs.createReadStream(file);
+            const filename = path.basename(file);
+            const buffer = await readFile(file);
+            form.append(
+                'upload',
+                new Blob([buffer]),
+                filename
+            );
         } else {
-            stream = intoStream(file.buffer);
-            options = {filename: file.name};
+            form.append(
+                'upload',
+                new Blob([file.buffer]),
+                file.name
+            );
         }
-
-        form.append('upload', stream, options);
 
         await this.client.request(
             `layouts/${this.layout}/records/${recordId}/containers/${fieldName}/${fieldRepetition}`,
