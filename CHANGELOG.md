@@ -1,3 +1,13 @@
+# [2.0.0](https://github.com/soliantconsulting/fm-data-api-client/compare/v1.5.0...v2.0.0) (2025-03-11)
+
+
+* feat!: replace node-fetch with native fetch (#15) ([a0db863](https://github.com/soliantconsulting/fm-data-api-client/commit/a0db863e8e893def866839cf1800b480ec4c49c1)), closes [#15](https://github.com/soliantconsulting/fm-data-api-client/issues/15)
+
+
+### BREAKING CHANGES
+
+* requires node 18. The type for ContainerDownload.buffer has changed
+
 # [1.5.0](https://github.com/soliantconsulting/fm-data-api-client/compare/v1.4.0...v1.5.0) (2025-01-16)
 
 
