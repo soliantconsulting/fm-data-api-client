@@ -75,7 +75,7 @@ export default class Client {
         containerUrl : string,
         request ?: RequestInit
     ) : Promise<ContainerDownload> {
-        if (!containerUrl.startsWith(this.uri)) {
+        if (!containerUrl.toLowerCase().startsWith(this.uri.toLowerCase())) {
             throw new Error('Container url must start with the same url ase the FM host');
         }
 
