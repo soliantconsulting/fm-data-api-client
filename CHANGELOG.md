@@ -1,3 +1,11 @@
+## [2.0.1](https://github.com/soliantconsulting/fm-data-api-client/compare/v2.0.0...v2.0.1) (2025-05-05)
+
+
+### Bug Fixes
+
+* npm upgrade to fix audit issue with bable/helpers ([1389cd5](https://github.com/soliantconsulting/fm-data-api-client/commit/1389cd55191154bd3a44d44da37134079a528631))
+* url checking should be case insensitive for container downloads ([0ff4c19](https://github.com/soliantconsulting/fm-data-api-client/commit/0ff4c194487d3ae482669967d1c7bc3b2f3933af))
+
 # [2.0.0](https://github.com/soliantconsulting/fm-data-api-client/compare/v1.5.0...v2.0.0) (2025-03-11)
 
 
