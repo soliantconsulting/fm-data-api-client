@@ -197,9 +197,6 @@ export default class Layout<T extends FieldData = FieldData, U extends GenericPo
             `layouts/${this.layout}/records/${recordId}/containers/${fieldName}/${fieldRepetition}`,
             {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
                 body: form,
             }
         );
