@@ -5,9 +5,10 @@
         "strictNullChecks": true,
         "sourceMap": true,
         "strict": true,
+        "declaration": true,
+        "outDir": "dist"
     },
     "include": [
-        "src/**/*",
-        "test/**/*"
+        "src/**/*"
     ]
 }

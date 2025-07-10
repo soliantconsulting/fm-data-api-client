@@ -166,6 +166,12 @@ export default class Client {
         request.headers = new Headers(request.headers);
 
         for (const header of headers) {
+            // If form data is set, skip setting a content-type header in order to let fetch
+            // generate one with a boundary instead.
+            if (header[0] === 'content-type' && request.body instanceof FormData) {
+                continue;
+            }
+
             if (!request.headers.has(header[0])) {
                 request.headers.append(header[0], header[1]);
             }
