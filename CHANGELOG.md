@@ -1,3 +1,10 @@
+## [2.0.3](https://github.com/soliantconsulting/fm-data-api-client/compare/v2.0.2...v2.0.3) (2025-07-10)
+
+
+### Bug Fixes
+
+* do not set multipart/form-data content type manually ([6b152a0](https://github.com/soliantconsulting/fm-data-api-client/commit/6b152a01eeda2ba7d30447a2c081e472784b7c9c))
+
 ## [2.0.2](https://github.com/soliantconsulting/fm-data-api-client/compare/v2.0.1...v2.0.2) (2025-07-10)
 
 
