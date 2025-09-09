@@ -1,3 +1,10 @@
+## [2.0.5](https://github.com/soliantconsulting/fm-data-api-client/compare/v2.0.4...v2.0.5) (2025-09-09)
+
+
+### Bug Fixes
+
+* typeo ([4aabbfe](https://github.com/soliantconsulting/fm-data-api-client/commit/4aabbfe1fdb1419a8d44983a759279013c63e8ca))
+
 ## [2.0.4](https://github.com/soliantconsulting/fm-data-api-client/compare/v2.0.3...v2.0.4) (2025-09-09)
 
 
