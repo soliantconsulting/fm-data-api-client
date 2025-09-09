@@ -257,7 +257,7 @@ describe('Client', () => {
 
     it('should throw error on requests with missmatched url', async () => {
         await expect(client.requestContainer('https://example.io'))
-            .rejects.toEqual(new Error('Container url must start with the same url ase the FM host'));
+            .rejects.toEqual(new Error('Container url must start with the same url as the FM host'));
     });
 
     describe('clearToken', () => {
