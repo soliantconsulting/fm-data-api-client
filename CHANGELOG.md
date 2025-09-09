@@ -1,3 +1,10 @@
+## [2.0.4](https://github.com/soliantconsulting/fm-data-api-client/compare/v2.0.3...v2.0.4) (2025-09-09)
+
+
+### Bug Fixes
+
+* missing type definitions ([4ed446a](https://github.com/soliantconsulting/fm-data-api-client/commit/4ed446a64c5dccf248d2ab14eb1273f60d8cfda2))
+
 ## [2.0.3](https://github.com/soliantconsulting/fm-data-api-client/compare/v2.0.2...v2.0.3) (2025-07-10)
 
 
