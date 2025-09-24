@@ -1,3 +1,13 @@
+# [3.0.0](https://github.com/soliantconsulting/fm-data-api-client/compare/v2.0.5...v3.0.0) (2025-09-24)
+
+
+* feat!: change return type for the container download from blob to ReadableStream ([db70c0c](https://github.com/soliantconsulting/fm-data-api-client/commit/db70c0c37a3b6500c28082b3f34b3642b9dc418e))
+
+
+### BREAKING CHANGES
+
+* buffer property for ContainerDownload is now ReadableStream instead of buffer.  response.blob() reads the whole response into ram preventing efficient use of memory to stream the response.
+
 ## [2.0.5](https://github.com/soliantconsulting/fm-data-api-client/compare/v2.0.4...v2.0.5) (2025-09-09)
 
 
