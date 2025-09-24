@@ -1,3 +1,5 @@
+import {Readable} from 'node:stream';
+import {text} from 'node:stream/consumers';
 import fetchMock from '@fetch-mock/jest';
 import {Client} from '../src';
 import {FileMakerError} from '../src/Client';
@@ -250,7 +252,18 @@ describe('Client', () => {
             });
 
             const response = await client.requestContainer(`https://localhost${containerPath}`);
-            expect(await response.buffer.text()).toBe('test');
+            expect(response.buffer).not.toBeNull();
+
+            //typescript thinks buffer could still be null if we don't check and throw
+            if (response.buffer === null) {
+                throw new Error('streamm is null');
+            }
+
+            const containerReadable = Readable.fromWeb(response.buffer, {
+                encoding: 'utf-8',
+            });
+            const value = await text(containerReadable);
+            expect(value).toBe('test');
             expect(response.contentType).toBe('application/text');
         });
     });

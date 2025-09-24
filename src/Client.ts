@@ -23,7 +23,7 @@ type FileMakerResponse<T> = {
 
 type ContainerDownload = {
     contentType ?: string | null;
-    buffer : Blob;
+    buffer : ReadableStream<unknown> | null;
 };
 
 export default class Client {
@@ -107,7 +107,7 @@ export default class Client {
 
         return {
             contentType: response.headers.get('Content-Type'),
-            buffer: await response.blob(),
+            buffer: response.body,
         };
     }
 
