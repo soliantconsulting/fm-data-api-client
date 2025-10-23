@@ -1,3 +1,10 @@
+## [3.0.1](https://github.com/soliantconsulting/fm-data-api-client/compare/v3.0.0...v3.0.1) (2025-10-23)
+
+
+### Bug Fixes
+
+* add provenance attestation ([f6b9d34](https://github.com/soliantconsulting/fm-data-api-client/commit/f6b9d34358969724ab3d40d1b1635021fd4f38e1))
+
 # [3.0.0](https://github.com/soliantconsulting/fm-data-api-client/compare/v2.0.5...v3.0.0) (2025-09-24)
 
 
