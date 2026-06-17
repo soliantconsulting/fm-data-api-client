@@ -4,7 +4,7 @@ import type {Numerish} from './Layout';
 /**
  * Quotes a string for use in queries.
  */
-export const quote = (value : string) : string => value.replace(/([\\=!<≤>≥…?@#*"~]|\/\/)/g, '\\$1');
+export const quote = (value: string): string => value.replace(/([\\=!<≤>≥…?@#*"~]|\/\/)/g, '\\$1');
 
 /**
  * Parses a FileMaker value as a number.
@@ -12,15 +12,16 @@ export const quote = (value : string) : string => value.replace(/([\\=!<≤>≥�
  * This utility function works the same way as FileMaker when it comes to interpret string values as numbers. An empty
  * string will be interpreted as <pre>null</pre>.
  */
-export const parseNumber = (value : Numerish) : number | null => {
+export const parseNumber = (value: Numerish): number | null => {
     if (typeof value === 'number') {
         return value;
     }
 
     value = value.replace(
         /^[^\d\-.]*(-?)([^.]*)(\.?)(.*)$/g,
-        (substring, ...args) => `${args[0] as string}${(args[1] as string).replace(/[^\d]+/g, '')}`
-            + `${args[2] as string}${(args[3] as string).replace(/[^\d]+/g, '')}`
+        (_substring, ...args) =>
+            `${args[0] as string}${(args[1] as string).replace(/[^\d]+/g, '')}` +
+            `${args[2] as string}${(args[3] as string).replace(/[^\d]+/g, '')}`,
     );
 
     if (value === '') {
@@ -43,7 +44,7 @@ export const parseNumber = (value : Numerish) : number | null => {
  *
  * This function will interpret any non-zero and non-empty value as true.
  */
-export const parseBoolean = (value : Numerish) : boolean => value !== 0 && value !== '0' && value !== '';
+export const parseBoolean = (value: Numerish): boolean => value !== 0 && value !== '0' && value !== '';
 
 /**
  * Date utility for working with dates, times and time stamps.
@@ -51,9 +52,9 @@ export const parseBoolean = (value : Numerish) : boolean => value !== 0 && value
  * @deprecated Use <pre>js-joda</pre> or another datetime library directly.
  */
 export class DateUtil {
-    private readonly dateFormatter : DateTimeFormatter;
-    private readonly timeFormatter : DateTimeFormatter;
-    private readonly timeStampFormatter : DateTimeFormatter;
+    private readonly dateFormatter: DateTimeFormatter;
+    private readonly timeFormatter: DateTimeFormatter;
+    private readonly timeStampFormatter: DateTimeFormatter;
 
     public constructor(dateFormat = 'MM/dd/yyyy', timeFormat = 'HH:mm:ss', timeStampFormat = 'MM/dd/yyyy HH:mm:ss') {
         this.dateFormatter = DateTimeFormatter.ofPattern(dateFormat);
@@ -61,27 +62,27 @@ export class DateUtil {
         this.timeStampFormatter = DateTimeFormatter.ofPattern(timeStampFormat);
     }
 
-    public parseDate(value : string) : LocalDate {
+    public parseDate(value: string): LocalDate {
         return LocalDate.parse(value, this.dateFormatter);
     }
 
-    public parseTime(value : string) : LocalTime {
+    public parseTime(value: string): LocalTime {
         return LocalTime.parse(value, this.timeFormatter);
     }
 
-    public parseTimeStamp(value : string) : LocalDateTime {
+    public parseTimeStamp(value: string): LocalDateTime {
         return LocalDateTime.parse(value, this.timeStampFormatter);
     }
 
-    public formatDate(value : LocalDate) : string {
+    public formatDate(value: LocalDate): string {
         return value.format(this.dateFormatter);
     }
 
-    public formatTime(value : LocalTime) : string {
+    public formatTime(value: LocalTime): string {
         return value.format(this.timeFormatter);
     }
 
-    public formatTimeStamp(value : LocalDateTime) : string {
+    public formatTimeStamp(value: LocalDateTime): string {
         return value.format(this.timeStampFormatter);
     }
 }
