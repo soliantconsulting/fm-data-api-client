@@ -8,7 +8,7 @@ describe('Utils', () => {
         });
 
         it('should not quote standard characters', () => {
-            expect(utils.quote('a_ \'[{')).toBe('a_ \'[{');
+            expect(utils.quote("a_ '[{")).toBe("a_ '[{");
         });
     });
 
@@ -17,9 +17,9 @@ describe('Utils', () => {
             expect(utils.parseNumber(5.3)).toBe(5.3);
         });
 
-        const stringCases : Array<[string, number | null]> = [
+        const stringCases: Array<[string, number | null]> = [
             ['', null],
-            ['.1', .1],
+            ['.1', 0.1],
             ['-', 0],
             ['foo1bar2', 12],
             ['714/715', 714715],
@@ -27,16 +27,13 @@ describe('Utils', () => {
             ['foo-7-14/...71.5', -714.715],
         ];
 
-        test.each(stringCases)(
-            'should parse "%s" as %p',
-            (input, expected) => {
-                expect(utils.parseNumber(input)).toBe(expected);
-            },
-        );
+        test.each(stringCases)('should parse "%s" as %p', (input, expected) => {
+            expect(utils.parseNumber(input)).toBe(expected);
+        });
     });
 
     describe('parseBoolean', () => {
-        const cases : Array<[string | number, boolean]> = [
+        const cases: Array<[string | number, boolean]> = [
             [0, false],
             [1, true],
             [-1, true],
@@ -46,12 +43,9 @@ describe('Utils', () => {
             ['test', true],
         ];
 
-        test.each(cases)(
-            'should parse %p as %p',
-            (input, expected) => {
-                expect(utils.parseBoolean(input)).toBe(expected);
-            },
-        );
+        test.each(cases)('should parse %p as %p', (input, expected) => {
+            expect(utils.parseBoolean(input)).toBe(expected);
+        });
     });
 
     describe('DateUtil', () => {
@@ -78,8 +72,9 @@ describe('Utils', () => {
         });
 
         it('should format a timestamp in default FileMaker format', () => {
-            expect(dateUtil.formatTimeStamp(LocalDateTime.of(2019, 2, 1, 13, 15, 0)).toString())
-                .toBe('02/01/2019 13:15:00');
+            expect(dateUtil.formatTimeStamp(LocalDateTime.of(2019, 2, 1, 13, 15, 0)).toString()).toBe(
+                '02/01/2019 13:15:00',
+            );
         });
     });
 });

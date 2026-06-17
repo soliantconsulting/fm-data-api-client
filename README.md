@@ -8,8 +8,8 @@ NodeJS client for the FileMaker Data API, written in TypeScript. This library su
 
 ## Requirements
 
- - Node 0.12+
- - @js-joda/core 3.0 or higher
+ - Node 22+
+ - @js-joda/core 5.0 or higher
 
 ## Connecting to a server
 

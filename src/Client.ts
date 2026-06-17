@@ -2,62 +2,60 @@ import type {FieldData, GenericPortalData} from './Layout';
 import Layout from './Layout';
 
 export class FileMakerError extends Error {
-    public readonly code : string;
+    public readonly code: string;
 
-    public constructor(code : string, message : string) {
+    public constructor(code: string, message: string) {
         super(message);
         this.code = code;
     }
 }
 
 type FileMakerErrorResponse = {
-    messages : Array<{
-        code : string;
-        message : string;
+    messages: Array<{
+        code: string;
+        message: string;
     }>;
 };
 
 type FileMakerResponse<T> = {
-    response : T;
+    response: T;
 };
 
 type ContainerDownload = {
-    contentType ?: string | null;
-    buffer : ReadableStream<unknown> | null;
+    contentType?: string | null;
+    buffer: ReadableStream<unknown> | null;
 };
 
 export default class Client {
-    private token : string | null = null;
+    private token: string | null = null;
     private lastCall = 0;
 
     public constructor(
-        private readonly uri : string,
-        private readonly database : string,
-        private readonly username : string,
-        private readonly password : string
-    ) {
-    }
+        private readonly uri: string,
+        private readonly database: string,
+        private readonly username: string,
+        private readonly password: string,
+    ) {}
 
-    public layout<
-        T extends FieldData = FieldData,
-        U extends GenericPortalData = GenericPortalData,
-    >(layout : string) : Layout<T, U> {
+    public layout<T extends FieldData = FieldData, U extends GenericPortalData = GenericPortalData>(
+        layout: string,
+    ): Layout<T, U> {
         return new Layout<T, U>(layout, this);
     }
 
-    public async request<T>(path : string, request ?: RequestInit, retryOnInvalidToken = true) : Promise<T> {
+    public async request<T>(path: string, request?: RequestInit, retryOnInvalidToken = true): Promise<T> {
         const authorizedRequest = Client.injectHeaders(
             new Headers({
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${await this.getToken()}`,
+                Authorization: `Bearer ${await this.getToken()}`,
             }),
-            request
+            request,
         );
 
         const response = await fetch(`${this.uri}/fmi/data/v1/databases/${this.database}/${path}`, authorizedRequest);
 
         if (!response.ok) {
-            const data = await response.json() as FileMakerErrorResponse;
+            const data = (await response.json()) as FileMakerErrorResponse;
 
             if (data.messages[0].code === '952' && retryOnInvalidToken) {
                 this.token = null;
@@ -68,13 +66,10 @@ export default class Client {
         }
 
         this.lastCall = Date.now();
-        return (await response.json() as FileMakerResponse<T>).response;
+        return ((await response.json()) as FileMakerResponse<T>).response;
     }
 
-    public async requestContainer(
-        containerUrl : string,
-        request ?: RequestInit
-    ) : Promise<ContainerDownload> {
+    public async requestContainer(containerUrl: string, request?: RequestInit): Promise<ContainerDownload> {
         if (!containerUrl.toLowerCase().startsWith(this.uri.toLowerCase())) {
             throw new Error('Container url must start with the same url as the FM host');
         }
@@ -83,9 +78,9 @@ export default class Client {
         const authorizedRequest = Client.injectHeaders(
             new Headers({
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
+                Authorization: `Bearer ${token}`,
             }),
-            request
+            request,
         );
         authorizedRequest.redirect = 'manual';
 
@@ -94,9 +89,9 @@ export default class Client {
         if (response.status === 302 && response.headers.has('set-cookie')) {
             const redirectRequest = Client.injectHeaders(
                 new Headers({
-                    'cookie': response.headers.get('set-cookie') ?? '',
+                    cookie: response.headers.get('set-cookie') ?? '',
                 }),
-                request
+                request,
             );
             return this.requestContainer(containerUrl, redirectRequest);
         }
@@ -111,7 +106,7 @@ export default class Client {
         };
     }
 
-    public async clearToken() : Promise<void> {
+    public async clearToken(): Promise<void> {
         if (!this.token) {
             return;
         }
@@ -127,14 +122,14 @@ export default class Client {
         this.lastCall = 0;
     }
 
-    private async getToken() : Promise<string> {
+    private async getToken(): Promise<string> {
         if (this.token !== null && Date.now() - this.lastCall < 14 * 60 * 1000) {
             return this.token;
         }
 
         const headers = {
             'Content-Type': 'application/json',
-            'Authorization': `Basic ${Buffer.from(`${this.username}:${this.password}`).toString('base64')}`,
+            Authorization: `Basic ${Buffer.from(`${this.username}:${this.password}`).toString('base64')}`,
         };
 
         const response = await fetch(`${this.uri}/fmi/data/v1/databases/${this.database}/sessions`, {
@@ -144,7 +139,7 @@ export default class Client {
         });
 
         if (!response.ok) {
-            const data = await response.json() as FileMakerErrorResponse;
+            const data = (await response.json()) as FileMakerErrorResponse;
             throw new FileMakerError(data.messages[0].code, data.messages[0].message);
         }
 
@@ -158,7 +153,7 @@ export default class Client {
         return this.token;
     }
 
-    private static injectHeaders(headers : Headers, request ?: RequestInit) : RequestInit {
+    private static injectHeaders(headers: Headers, request?: RequestInit): RequestInit {
         if (!request) {
             request = {};
         }
