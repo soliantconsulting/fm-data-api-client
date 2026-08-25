@@ -7,9 +7,10 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "rm -rf dist && rollup -c",
-    "lint": "eslint .",
+    "lint": "biome check src test",
     "test": "jest test --coverage",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "format": "biome check --write src test"
   },
   "repository": {
     "type": "git",
@@ -28,34 +29,33 @@
   "author": "Soliant Consulting",
   "license": "MIT",
   "devDependencies": {
-    "@commitlint/cli": "^19.0.0",
-    "@commitlint/config-conventional": "^19.0.0",
+    "@biomejs/biome": "2.5.9",
+    "@commitlint/cli": "^21.2.2",
+    "@commitlint/config-conventional": "^21.2.2",
     "@fetch-mock/jest": "^0.2.14",
-    "@js-joda/core": "^5.2.0",
-    "@rollup/plugin-typescript": "^8.3.4",
-    "@tsconfig/node18": "^18.2.4",
+    "@js-joda/core": "^5.7.0",
+    "@rollup/plugin-typescript": "^8.5.0",
+    "@tsconfig/node22": "^22.0.6",
     "@types/jest": "^29.0.0",
-    "@types/node": "^18.19.79",
-    "@types/sinon": "^10.0.11",
-    "eslint": "^8.13.0",
-    "eslint-config-dasprid": "^0.3.2",
+    "@types/node": "^22.20.1",
+    "@types/sinon": "^10.0.20",
     "fetch-mock": "^12.5.1",
     "husky": "^8.0.1",
     "jest": "^29.0.0",
-    "lint-staged": "^15.4.0",
-    "rollup": "^2.78.0",
-    "sinon": "^14.0.0",
+    "lint-staged": "^17.3.0",
+    "rollup": "^2.80.0",
+    "sinon": "^14.0.2",
     "ts-jest": "^29.0.0",
     "tslib": "^2.8.1",
-    "typescript": "~5.8.0"
+    "typescript": "~5.9.3"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   },
   "peerDependencies": {
     "@js-joda/core": "^3.0.0 || ^4.0.0 || ^5.0.0"
   },
   "lint-staged": {
-    "*.ts": "eslint --cache --fix"
+    "*.ts": "biome check --write --no-errors-on-unmatched --files-ignore-unknown=true"
   }
 }

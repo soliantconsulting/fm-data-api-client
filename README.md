@@ -8,8 +8,25 @@ NodeJS client for the FileMaker Data API, written in TypeScript. This library su
 
 ## Requirements
 
- - Node 0.12+
+ - Node 22+
  - @js-joda/core 3.0 or higher
+
+## Upgrading from 3.x to 4.x
+
+Version 4 drops support for Node 18 and 20, and corrects several types that did not match the
+Data API specification:
+
+ - **`UpdateParams.modId` is now a `string`** rather than a `number`, matching the Data API. The
+   `modId` returned by a previous response can now be passed straight back in. This is the one
+   change that can break a call site: a numeric `modId` needs `String(modId)`.
+ - `layout.get()`, `layout.update()`, `layout.delete()` and `layout.upload()` accept `recordId`
+   as `string | number`. Record IDs are only ever interpolated into the request URL, so both
+   forms work, and the `recordId` returned by a response now feeds straight back in without a
+   cast. Existing numeric call sites are unaffected.
+ - `GetResponse` now includes `dataInfo`, which the server already returns for `get()` and
+   `range()`. `dataInfo` also gained the `database`, `layout` and `table` members it always
+   carried, alongside the existing counts.
+ - `UpdateResponse` gained an optional `newPortalRecordInfo`.
 
 ## Connecting to a server
 
