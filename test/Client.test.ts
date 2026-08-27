@@ -71,6 +71,67 @@ describe('Client', () => {
             await client.request('test');
         });
 
+        it('should sign in once when several requests arrive on a cold token', async () => {
+            fetchMock.post('https://localhost/fmi/data/v1/databases/db/sessions', {
+                status: 200,
+                headers: {'X-FM-Data-Access-Token': 'foo'},
+                body: {},
+            });
+
+            fetchMock.get('https://localhost/fmi/data/v1/databases/db/test', {
+                status: 200,
+                headers: {
+                    'authorization': 'Bearer foo',
+                    'content-type': 'application/json',
+                },
+                body: {response: 'test'},
+            });
+
+            await Promise.all([client.request('test'), client.request('test'), client.request('test')]);
+
+            // one session for the three of them: without sharing the in-flight sign in, each caller
+            // opens its own and every session but the last is orphaned on the server
+            expect(fetchMock).toHaveFetchedTimes(1, new URL('https://localhost/fmi/data/v1/databases/db/sessions'));
+        });
+
+        it('should sign in again after a failed sign in', async () => {
+            fetchMock.postOnce('https://localhost/fmi/data/v1/databases/db/sessions', {
+                status: 400,
+                body: {messages: [{code: '0', message: 'error'}]},
+            });
+
+            await expect(client.request('test')).rejects.toEqual(new FileMakerError('0', 'error'));
+
+            fetchMock.post('https://localhost/fmi/data/v1/databases/db/sessions', {
+                status: 200,
+                headers: {'X-FM-Data-Access-Token': 'foo'},
+                body: {},
+            });
+
+            fetchMock.get('https://localhost/fmi/data/v1/databases/db/test', {
+                status: 200,
+                headers: {
+                    'authorization': 'Bearer foo',
+                    'content-type': 'application/json',
+                },
+                body: {response: 'test'},
+            });
+
+            // a rejected sign in must not be left cached, or the client can never recover
+            await expect(client.request('test')).resolves.toBe('test');
+        });
+
+        it('should reject every waiter when the shared sign in fails', async () => {
+            fetchMock.post('https://localhost/fmi/data/v1/databases/db/sessions', {
+                status: 400,
+                body: {messages: [{code: '0', message: 'error'}]},
+            });
+
+            const results = await Promise.allSettled([client.request('test'), client.request('test')]);
+
+            expect(results.map(result => result.status)).toEqual(['rejected', 'rejected']);
+        });
+
         it('should request a new token after 14 minutes', async () => {
             fetchMock.post('https://localhost/fmi/data/v1/databases/db/sessions', {
                 status: 200,
