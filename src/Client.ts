@@ -29,6 +29,7 @@ type ContainerDownload = {
 export default class Client {
     private token: string | null = null;
     private lastCall = 0;
+    private tokenRequest: Promise<string> | null = null;
 
     public constructor(
         private readonly uri: string,
@@ -127,6 +128,18 @@ export default class Client {
             return this.token;
         }
 
+        // Without this, every caller arriving on a cold or expired token opens its own session.
+        // Only the last one is kept in this.token; the rest are never referenced again and never
+        // deleted, so they sit against the server's session limit until it times them out. Sharing
+        // the in-flight request means one login however many callers arrive together.
+        this.tokenRequest ??= this.mintToken().finally(() => {
+            this.tokenRequest = null;
+        });
+
+        return this.tokenRequest;
+    }
+
+    private async mintToken(): Promise<string> {
         const headers = {
             'Content-Type': 'application/json',
             'Authorization': `Basic ${Buffer.from(`${this.username}:${this.password}`).toString('base64')}`,
