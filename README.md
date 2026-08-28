@@ -28,6 +28,22 @@ Data API specification:
    carried, alongside the existing counts.
  - `UpdateResponse` gained an optional `newPortalRecordInfo`.
 
+It also changes how sessions are managed. The client now keeps a **pool** of Data API sessions
+instead of one shared token, so concurrent calls no longer interleave on a single FileMaker session,
+and a burst of concurrent cold calls no longer leaves orphaned sessions on the server:
+
+ - Concurrent calls use up to `max` sessions (default 5), configurable via a new optional fifth
+   constructor argument. See [Session pooling](#session-pooling).
+ - **New `client.destroy()`** signs out of every session and closes the pool. Call it on shutdown.
+   `Client` also implements `Symbol.asyncDispose`, so `await using` works.
+ - **New `client.withSession(callback)`** pins several calls to one session, for the cases where
+   FileMaker keeps state per session.
+ - **`client.clearToken()` is deprecated** in favour of `destroy()`. It still signs out of every
+   session held at the time of the call and leaves the client usable, so existing calls keep working.
+ - `FileMakerError` is now exported from the package root. Previously there was no supported way to
+   get at it for an `instanceof` check.
+ - Pool exhaustion rejects with `TimeoutError`, re-exported from the package root.
+
 ## Connecting to a server
 
 In order to connect to a server, create a new instance of a client:
@@ -35,15 +51,121 @@ In order to connect to a server, create a new instance of a client:
 ```typescript
 import {Client} from 'fm-data-api-client';
 
-const client = new Client('https://file-maker-server', 'username', 'password', 'database');
+const client = new Client('https://file-maker-server', 'database', 'username', 'password');
 ```
+
+A client is meant to be long lived. Create one per process, share it, and shut it down with
+`destroy()` - see [Session pooling](#session-pooling) below.
+
+## Session pooling
+
+The client does not hold a single Data API token. It keeps a pool of sessions, and every call checks
+one out for its duration and returns it afterwards. FileMaker treats a session as one logical
+connection and serialises the work on it, so concurrent callers each get their own session instead of
+interleaving on a shared one:
+
+```typescript
+// Three sessions, three concurrent Data API calls.
+await Promise.all([
+    client.layout('orders').find({query: [{status: '=open'}]}),
+    client.layout('orders').find({query: [{status: '=shipped'}]}),
+    client.layout('customers').range({limit: 100}),
+]);
+```
+
+Sessions are signed in on demand, reused while they stay warm, and signed out once they have been
+idle for `idleTimeoutMillis` - shortly before FileMaker's own 15 minute expiry, so they are released
+on the server rather than left to time out. If the server reports an invalid token (error `952`), that
+session is retired and the call is retried once on a fresh one.
+
+The pool is configured with an optional fifth constructor argument:
+
+```typescript
+const client = new Client('https://file-maker-server', 'database', 'username', 'password', {
+    max: 10,
+});
+```
+
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `max` | `5` | Maximum concurrent sessions. Each one is a real FileMaker Server connection, so this is the ceiling on Data API concurrency for this client. Calls beyond it queue. |
+| `min` | `0` | Sessions to keep on hand. Leave it at `0`: a non-zero value holds sessions open past `idleTimeoutMillis` and keeps a timer alive for the lifetime of the process. It does not pre-warm the pool - sessions are only ever created on demand. |
+| `idleTimeoutMillis` | `13 * 60 * 1000` | How long an unused session is kept before it is signed out. |
+| `acquireTimeoutMillis` | `30_000` | How long a call waits for a free session before rejecting with `TimeoutError`. |
+| `createTimeoutMillis` | `30_000` | How long a sign-in may take. |
+| `destroyTimeoutMillis` | `5_000` | How long a sign-out may take. |
+| `reapIntervalMillis` | `30_000` | How often idle sessions are looked for. |
+| `createRetryIntervalMillis` | `200` | How long to wait after a failed sign-in before trying again. |
+| `propagateCreateError` | `true` | Reject the waiting call as soon as a sign-in fails. With `false`, bad credentials are retried until `acquireTimeoutMillis` elapses and then surface as a `TimeoutError` instead of the FileMaker error that explains the problem. |
+| `log` | none | Receives the pool's internal warnings. |
+
+`max` bounds the sessions the pool holds, not quite the sessions FileMaker sees: when a session is
+retired, its sign-out overlaps the sign-in of its replacement, so budget a little headroom against any
+server-side session limit.
+
+Pool exhaustion is reported with `TimeoutError`, which is re-exported for convenience:
+
+```typescript
+import {TimeoutError} from 'fm-data-api-client';
+
+try {
+    await client.layout('orders').range();
+} catch (e) {
+    if (e instanceof TimeoutError) {
+        // No session became free within acquireTimeoutMillis.
+    }
+}
+```
+
+### Using one session for several calls
+
+FileMaker keeps some state per session, a found set being the obvious example. `withSession` pins a
+run of calls to a single session:
+
+```typescript
+await client.withSession(async session => {
+    const created = await session.layout('orders').create({customer: 'ACME'});
+    return session.layout('orders').get(created.recordId);
+});
+```
+
+The session is returned to the pool once the callback settles and cannot be used afterwards, so do not
+store it or let it escape. Nothing inside the callback may call `client.request`, `client.layout(...)`
+or `client.withSession` again: those check out a *second* session while the callback is still holding
+the first, which deadlocks once the pool is full. Use the `session` argument for everything inside.
+
+An invalid token is not retried inside `withSession`, because the callback may already have written
+something and must not run twice.
+
+### Shutting down
+
+The client holds server sessions, so release them on shutdown:
+
+```typescript
+await client.destroy();
+```
+
+That signs out of every session, waiting for in-flight calls to finish first, and closes the pool.
+The client cannot be used afterwards. On Node 22 `await using` works too:
+
+```typescript
+await using client = new Client('https://file-maker-server', 'database', 'username', 'password');
+```
+
+Forgetting `destroy()` will not hang your process - idle sessions are signed out on their own, and
+the pool's timer does not hold the event loop open - but the sessions stay registered on the server
+until they expire.
 
 ## Sign out
 
-If you want to manually sign out to release the token, you can call the `clearToken` method:
+> **Deprecated.** Idle sessions are signed out automatically. Use
+> [`destroy()`](#shutting-down) to shut a client down for good, which is almost always what is
+> wanted here.
+
+`clearToken` signs out of every session held right now and carries on with fresh ones:
 
 ```typescript
-client.clearToken();
+await client.clearToken();
 ```
 
 ## Retrieving a layout client

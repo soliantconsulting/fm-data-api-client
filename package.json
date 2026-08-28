@@ -57,5 +57,8 @@
   },
   "lint-staged": {
     "*.ts": "biome check --write --no-errors-on-unmatched --files-ignore-unknown=true"
+  },
+  "dependencies": {
+    "tarn": "^3.1.2"
   }
 }
