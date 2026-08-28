@@ -1,7 +1,14 @@
 import {readFile} from 'node:fs/promises';
 import path from 'node:path';
-import type Client from './Client';
-import {FileMakerError} from './Client';
+import {FileMakerError} from './FileMakerError';
+
+/**
+ * The part of a client a layout actually needs. Both `Client`, which checks a session out of the
+ * pool per call, and `Session`, which is already bound to one, satisfy it.
+ */
+export interface LayoutClient {
+    request<T>(path: string, request?: RequestInit): Promise<T>;
+}
 
 export type Numerish = string | number;
 export type FieldValue = string | Numerish;
@@ -132,7 +139,7 @@ export type ExecuteScriptResponse = Pick<ScriptResponse, 'scriptResult' | 'scrip
 export default class Layout<T extends FieldData = FieldData, U extends GenericPortalData = GenericPortalData> {
     public constructor(
         private readonly layout: string,
-        private readonly client: Client,
+        private readonly client: LayoutClient,
     ) {}
 
     public async create(fieldData: Partial<T>, params: CreateParams = {}): Promise<CreateResponse> {
