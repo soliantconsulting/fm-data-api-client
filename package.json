@@ -8,6 +8,7 @@
   "scripts": {
     "build": "rm -rf dist && rollup -c",
     "lint": "biome check src test",
+    "typecheck": "tsc --noEmit",
     "test": "jest test --coverage",
     "prepare": "husky install",
     "format": "biome check --write src test"
