@@ -29,23 +29,23 @@
   "author": "Soliant Consulting",
   "license": "MIT",
   "devDependencies": {
-    "@biomejs/biome": "2.5.9",
-    "@commitlint/cli": "^21.2.2",
-    "@commitlint/config-conventional": "^21.2.2",
-    "@fetch-mock/jest": "^0.2.14",
-    "@js-joda/core": "^5.7.0",
+    "@biomejs/biome": "2.5.14",
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
+    "@fetch-mock/jest": "^0.2.20",
+    "@js-joda/core": "^6.1.0",
     "@rollup/plugin-typescript": "^8.5.0",
     "@tsconfig/node22": "^22.0.6",
     "@types/jest": "^29.0.0",
-    "@types/node": "^22.20.1",
+    "@types/node": "^22.20.4",
     "@types/sinon": "^10.0.20",
-    "fetch-mock": "^12.5.1",
+    "fetch-mock": "^12.6.0",
     "husky": "^8.0.1",
     "jest": "^29.0.0",
-    "lint-staged": "^17.3.0",
+    "lint-staged": "^17.6.0",
     "rollup": "^2.80.0",
     "sinon": "^14.0.2",
-    "ts-jest": "^29.0.0",
+    "ts-jest": "^29.4.14",
     "tslib": "^2.8.1",
     "typescript": "~5.9.3"
   },
@@ -53,7 +53,7 @@
     "node": ">=22.0.0"
   },
   "peerDependencies": {
-    "@js-joda/core": "^3.0.0 || ^4.0.0 || ^5.0.0"
+    "@js-joda/core": "^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.1.0"
   },
   "lint-staged": {
     "*.ts": "biome check --write --no-errors-on-unmatched --files-ignore-unknown=true"
