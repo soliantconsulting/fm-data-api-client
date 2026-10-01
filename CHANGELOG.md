@@ -1,3 +1,10 @@
+## [3.0.2](https://github.com/soliantconsulting/fm-data-api-client/compare/v3.0.1...v3.0.2) (2026-10-01)
+
+
+### Bug Fixes
+
+* bump js-jod/core to 6 and update a few other packages ([#29](https://github.com/soliantconsulting/fm-data-api-client/issues/29)) ([696877e](https://github.com/soliantconsulting/fm-data-api-client/commit/696877e2d3f2836fb3a87dcc8527597631d32024))
+
 ## [3.0.1](https://github.com/soliantconsulting/fm-data-api-client/compare/v3.0.0...v3.0.1) (2025-10-23)
 
 
